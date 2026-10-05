@@ -42,9 +42,6 @@ export const OperationsOverview: React.FC = () => {
   const [lastRefreshed, setLastRefreshed] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  // Capacity Matrix state
-  const [rebalancedNov, setRebalancedNov] = useState(false);
-
   const loadData = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -178,12 +175,12 @@ export const OperationsOverview: React.FC = () => {
         onClick: () => navigate("/sample-requests"),
       },
       {
-        id: "capacity_load",
-        label: "Plant SCU Load",
-        value: "1.90 SCU",
-        deltaText: "Average plant effort index",
+        id: "active_programs",
+        label: "Seasonal Programs",
+        value: requests.filter((r) => r.requestKind === "program" || r.creationMode === "program_planning").length,
+        deltaText: "Planning campaigns",
         deltaTone: "neutral",
-        onClick: () => navigate("/analytics"),
+        onClick: () => navigate("/sample-requests/programs"),
       },
     ],
     [telemetry, selectedYear, navigate]
@@ -294,17 +291,37 @@ export const OperationsOverview: React.FC = () => {
     }));
   }, [requests]);
 
-  const handleRebalanceQuota = () => {
-    setRebalancedNov(true);
-    window.dispatchEvent(
-      new CustomEvent("app:show-toast", {
-        detail: {
-          message: "✓ Rebalanced: 4.8 SCU workload transferred from Plant 01 (Pune) to Plant 02 (Vapi).",
-          tone: "success",
-        },
+  // Real Plant Distribution derived from requests
+  const plantDistribution = useMemo(() => {
+    const counts: Record<string, number> = {};
+    requests.forEach((r) => {
+      const plant = r.targetPlant?.trim() || "Unassigned";
+      counts[plant] = (counts[plant] || 0) + 1;
+    });
+    const total = requests.length || 1;
+    return Object.entries(counts)
+      .map(([plant, count]) => ({
+        plant,
+        count,
+        percentage: Math.round((count / total) * 100),
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [requests]);
+
+  // Urgent requests due within 5 days or past due
+  const urgentRequests = useMemo(() => {
+    const now = new Date();
+    const threshold = new Date(now.getTime() + 5 * 86400000);
+    return requests
+      .filter((r) => {
+        if (!r.sampleRequiredDate) return false;
+        const d = new Date(r.sampleRequiredDate);
+        const s = (r.status || "").toLowerCase();
+        const isClosed = s.includes("dispatch") || s.includes("deal") || s.includes("closed") || s.includes("reject");
+        return d <= threshold && !isClosed;
       })
-    );
-  };
+      .slice(0, 5);
+  }, [requests]);
 
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 overflow-y-auto bg-[#f1f3f5] dark:bg-[#0c0d12] text-[#1e293b] dark:text-zinc-100 select-text font-sans">
@@ -392,7 +409,7 @@ export const OperationsOverview: React.FC = () => {
                 onClick={() => navigate(desk.route)}
                 role="link"
                 tabIndex={0}
-                className="group relative flex flex-col justify-between p-4 rounded bg-white dark:bg-[#141722] border border-[#d8dadd] dark:border-white/10 hover:border-[#714b67] dark:hover:border-purple-400 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-150 cursor-pointer select-none"
+                className="group relative flex flex-col justify-between p-4 rounded bg-white dark:bg-[#141722] border border-[#d8dadd] dark:border-white/10 hover:border-[#714b67] dark:hover:border-purple-400 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-[border-color,box-shadow] duration-150 cursor-pointer select-none"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -440,106 +457,120 @@ export const OperationsOverview: React.FC = () => {
         </section>
 
         {/* ===================================================================== */}
-        {/* 4. ANNUAL PLANT CAPACITY BALANCING MATRIX (Oct -> Sep Model)          */}
+        {/* 4. OPERATIONAL WORKFLOW RADAR & FACILITY ALLOCATION                   */}
         {/* ===================================================================== */}
-        <section className="bg-white dark:bg-[#141722] border border-[#d8dadd] dark:border-white/10 rounded shadow-xs p-4 sm:p-5 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-200 dark:border-white/10 gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Left: Urgent SLA Action Queue */}
+          <section className="lg:col-span-7 bg-white dark:bg-[#141722] border border-[#d8dadd] dark:border-white/10 rounded shadow-xs p-4 sm:p-5 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#1e293b] dark:text-zinc-50">
-                  Annual Plant Capacity Balancing Matrix (Oct 2026 → Sep 2027)
-                </h3>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 text-[#714b67] border border-purple-200">
-                  SCU Quotas
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-white/10">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-[#1e293b] dark:text-zinc-50">
+                    Urgent SLA Radar & Upcoming Milestones
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
+                    Due &lt;5 Days
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/sample-requests")}
+                  className="text-[11px] font-semibold text-[#017e84] hover:underline cursor-pointer"
+                >
+                  Manage All
+                </button>
+              </div>
+
+              <div className="mt-3 divide-y divide-zinc-100 dark:divide-white/[0.05]">
+                {urgentRequests.length > 0 ? (
+                  urgentRequests.map((r) => (
+                    <div
+                      key={r.id}
+                      onClick={() => navigate("/sample-requests")}
+                      className="py-2.5 flex items-center justify-between gap-3 hover:bg-zinc-50 dark:hover:bg-white/[0.02] -mx-2 px-2 rounded cursor-pointer transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs text-[#714b67] dark:text-purple-300">
+                            {r.srNumber || r.materialCode}
+                          </span>
+                          <span className="text-zinc-400">·</span>
+                          <span className="font-semibold text-xs text-zinc-800 dark:text-zinc-200 truncate">
+                            {r.customer}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                          {r.productDescription}
+                        </p>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50">
+                          {r.sampleRequiredDate || "Immediate"}
+                        </span>
+                        <div className="text-[10px] text-zinc-400 font-mono mt-0.5">
+                          {r.status || "Intake"}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-zinc-400 text-xs">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto mb-1.5 opacity-80" />
+                    No critical SLA breaches pending. All requests on schedule.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/[0.06] flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+              <span>Auto-tracked against standard working-day calendar</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">SLA Health: Optimal</span>
+            </div>
+          </section>
+
+          {/* Right: Active Plant Allocation */}
+          <section className="lg:col-span-5 bg-white dark:bg-[#141722] border border-[#d8dadd] dark:border-white/10 rounded shadow-xs p-4 sm:p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-white/10">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-[#1e293b] dark:text-zinc-50">
+                    Fulfillment Facility Allocation
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                    Live
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono text-zinc-400">
+                  {requests.length} Total
                 </span>
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                Declared Capacity vs. Sales Demand Plan vs. Released Sampling Load in Sampling Capacity Units (SCU).
-              </p>
+
+              <div className="mt-3 space-y-3">
+                {plantDistribution.map((item) => (
+                  <div key={item.plant} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-zinc-700 dark:text-zinc-300 truncate">{item.plant}</span>
+                      <span className="font-mono text-zinc-900 dark:text-zinc-100 tabular-nums">
+                        {item.count} req ({item.percentage}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-zinc-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#714b67] dark:bg-purple-400 rounded-full transition-[width] duration-300"
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleRebalanceQuota}
-              disabled={rebalancedNov}
-              className={`px-3 py-1 rounded text-xs font-semibold shadow-xs transition cursor-pointer active:scale-95 ${
-                rebalancedNov
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-zinc-700"
-                  : "bg-[#017e84] hover:bg-[#00666a] text-white"
-              }`}
-            >
-              {rebalancedNov ? "✓ Rebalanced" : "Revise Declared Quota"}
-            </button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-center border-collapse text-xs">
-              <thead className="bg-[#f8f9fa] dark:bg-white/[0.02] text-zinc-600 dark:text-zinc-400 font-mono text-[10px] uppercase border-b border-zinc-200 dark:border-white/10">
-                <tr>
-                  <th className="p-2 text-left w-48">Measurement (SCU)</th>
-                  <th className="p-2">Oct</th><th className="p-2">Nov</th><th className="p-2">Dec</th>
-                  <th className="p-2">Jan</th><th className="p-2">Feb</th><th className="p-2">Mar</th>
-                  <th className="p-2">Apr</th><th className="p-2">May</th><th className="p-2">Jun</th>
-                  <th className="p-2">Jul</th><th className="p-2">Aug</th><th className="p-2">Sep</th>
-                  <th className="p-2 bg-zinc-100 dark:bg-white/[0.05] font-bold">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-white/[0.06] font-mono">
-                <tr className="hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
-                  <td className="p-2 text-left font-sans font-bold text-zinc-800 dark:text-zinc-200">Declared Capacity</td>
-                  <td>40</td><td>40</td><td>35</td><td>40</td><td>40</td><td>45</td>
-                  <td>45</td><td>45</td><td>40</td><td>35</td><td>35</td><td>40</td>
-                  <td className="bg-zinc-50 dark:bg-white/[0.03] font-bold text-zinc-900 dark:text-zinc-100">480</td>
-                </tr>
-                <tr className="hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
-                  <td className="p-2 text-left font-sans font-medium text-zinc-600 dark:text-zinc-400">Sales Demand Plan</td>
-                  <td>38</td><td>42</td><td>30</td><td>35</td><td>48</td><td>52</td>
-                  <td>44</td><td>40</td><td>36</td><td>30</td><td>28</td><td>32</td>
-                  <td className="bg-zinc-50 dark:bg-white/[0.03] font-bold text-zinc-900 dark:text-zinc-100">455</td>
-                </tr>
-                <tr className="hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
-                  <td className="p-2 text-left font-sans font-bold text-[#714b67] dark:text-purple-300">Released Workload</td>
-                  <td className="text-emerald-700 dark:text-emerald-400 font-bold">34.2</td>
-                  <td className={`font-bold ${rebalancedNov ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30"}`}>
-                    {rebalancedNov ? "40.0" : "44.8 *"}
-                  </td>
-                  <td className="text-emerald-700 dark:text-emerald-400 font-bold">28.0</td>
-                  <td className="text-emerald-700 dark:text-emerald-400 font-bold">31.5</td>
-                  <td className="text-zinc-400">-</td><td className="text-zinc-400">-</td>
-                  <td className="text-zinc-400">-</td><td className="text-zinc-400">-</td>
-                  <td className="text-zinc-400">-</td><td className="text-zinc-400">-</td>
-                  <td className="text-zinc-400">-</td><td className="text-zinc-400">-</td>
-                  <td className="bg-zinc-50 dark:bg-white/[0.03] font-bold text-zinc-800 dark:text-zinc-200">
-                    {rebalancedNov ? "133.7" : "138.5"}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Plant Load Notification banner */}
-          <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded text-xs text-amber-900 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>
-                <strong>Plant 01 Load Balancing:</strong>{" "}
-                {rebalancedNov
-                  ? "Load balanced across Pune & Vapi. November capacity within safe operating limits."
-                  : "November released load (44.8 SCU) exceeds declared capacity (40 SCU) by 12%. Rebalance recommended."}
-              </span>
+            <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/[0.06] text-[11px] text-zinc-400">
+              Allocated across active manufacturing sites.
             </div>
-
-            {!rebalancedNov && (
-              <button
-                type="button"
-                onClick={handleRebalanceQuota}
-                className="bg-amber-800 hover:bg-amber-900 text-white font-semibold px-2.5 py-1 rounded text-[11px] transition active:scale-95 cursor-pointer"
-              >
-                Rebalance to Plant 02 (Vapi)
-              </button>
-            )}
-          </div>
-        </section>
+          </section>
+        </div>
 
         {/* ===================================================================== */}
         {/* 5. CROSS-DEPARTMENT HANDOFF & RECENT ACTIVITY STREAM                  */}

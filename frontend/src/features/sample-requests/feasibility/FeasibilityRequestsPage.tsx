@@ -3,7 +3,7 @@ import { UserProfile } from "@/features/auth";
 import { SampleRequestItem } from "../types";
 import { getRequestTrackType } from "../utils/trackTypes";
 import { cleanFeasibilityDescription } from "../api";
-import { formatOdooDate } from "../utils/dateUtils";
+import { formatErpDate } from "../utils/dateUtils";
 import {
   Search,
   Plus,
@@ -613,7 +613,7 @@ export const FeasibilityRequestsPage: React.FC<FeasibilityRequestsPageProps> = (
 
       {/* ── Search & Filter Pill Control Strip (Exact Matching SAMP Workbench) ── */}
       <div className="bg-white dark:bg-[#12141d] border-b border-[#E2E8F0] dark:border-white/[0.08] px-6 py-2.5 shrink-0 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Odoo Segmented Filter Pills */}
+        {/* Left: Enterprise Segmented Filter Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
           {[
             { id: "all", label: "All Feasibility", count: tabCounts.all },
@@ -837,7 +837,7 @@ export const FeasibilityRequestsPage: React.FC<FeasibilityRequestsPageProps> = (
 
                         {/* SLA Date */}
                         <td className="py-3 px-4 whitespace-nowrap font-mono text-neutral-600 dark:text-zinc-300">
-                          {req.sampleRequiredDate ? formatOdooDate(req.sampleRequiredDate) : "Flexible"}
+                          {req.sampleRequiredDate ? formatErpDate(req.sampleRequiredDate) : "Flexible"}
                         </td>
 
                         {/* SAMP Claim Status */}
@@ -971,7 +971,7 @@ export const FeasibilityRequestsPage: React.FC<FeasibilityRequestsPageProps> = (
                     onDragOver={(e) => handleColDragOver(e, col.id)}
                     onDragLeave={() => setDragOverCol((prev) => (prev === col.id ? null : prev))}
                     onDrop={(e) => handleColDrop(e, col.id)}
-                    className={`w-76 rounded-lg border transition-all ${
+                    className={`w-76 rounded-lg border transition-colors duration-100 ${
                       dragOverCol === col.id
                         ? "border-[#714B67] bg-purple-50/70 dark:bg-purple-950/40 ring-2 ring-[#714B67]/40 ring-offset-1"
                         : `${col.borderTone} ${col.bgTone}`
@@ -1042,7 +1042,7 @@ export const FeasibilityRequestsPage: React.FC<FeasibilityRequestsPageProps> = (
                                   <span className="truncate">{req.targetPlant || "All Plants"}</span>
                                 </div>
                                 <span>
-                                  SLA: {req.sampleRequiredDate ? formatOdooDate(req.sampleRequiredDate) : "Flexible"}
+                                  SLA: {req.sampleRequiredDate ? formatErpDate(req.sampleRequiredDate) : "Flexible"}
                                 </span>
                               </div>
 

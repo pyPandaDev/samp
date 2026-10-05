@@ -59,7 +59,7 @@ export const StagingWorkspaceHeader: React.FC<StagingWorkspaceHeaderProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* 1. Odoo ERP Control Panel: Breadcrumbs, Pipeline Stages & Global Action Bar */}
+      {/* 1. Enterprise ERP Control Panel: Breadcrumbs, Pipeline Stages & Global Action Bar */}
       <div className="bg-white dark:bg-[#12141d] border border-[#CED4DA] dark:border-white/[0.08] rounded px-4 py-3 shadow-2xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Left: Breadcrumbs & Document Title */}
@@ -75,7 +75,7 @@ export const StagingWorkspaceHeader: React.FC<StagingWorkspaceHeaderProps> = ({
             </button>
 
             <div className="min-w-0">
-              {/* Odoo Breadcrumb Path */}
+              {/* Enterprise Breadcrumb Path */}
               <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-sans">
                 <button
                   type="button"
@@ -101,7 +101,7 @@ export const StagingWorkspaceHeader: React.FC<StagingWorkspaceHeaderProps> = ({
             </div>
           </div>
 
-          {/* Right: Odoo Pipeline Stage Status Bar */}
+          {/* Right: Enterprise Pipeline Stage Status Bar */}
           <div className="hidden md:flex items-center border border-[#CED4DA] dark:border-zinc-700 rounded overflow-hidden text-[11px] font-semibold bg-[#F8F9FA] dark:bg-zinc-900/60 divide-x divide-[#CED4DA] dark:divide-zinc-700 select-none">
             <div className="px-3 py-1.5 text-zinc-500 dark:text-zinc-400">1. Draft (Pre-PMT)</div>
             <div className="px-3.5 py-1.5 bg-[#714B67] text-white font-bold flex items-center gap-1.5 shadow-2xs">
@@ -139,7 +139,7 @@ export const StagingWorkspaceHeader: React.FC<StagingWorkspaceHeaderProps> = ({
               </button>
             )}
 
-            {/* Release Request Button (Odoo Primary Action: Teal #017E84) */}
+            {/* Release Request Button (Enterprise Primary Action: Teal #017E84) */}
             {(stagedProducts.length > 0 || programContext.parentRequestId) && (
               <button
                 type="button"
@@ -173,7 +173,7 @@ export const StagingWorkspaceHeader: React.FC<StagingWorkspaceHeaderProps> = ({
         </div>
       </div>
 
-      {/* 2. Odoo Form Sheet Header: Program Context & Enterprise Stat Buttons */}
+      {/* 2. Enterprise Form Sheet Header: Program Context & Enterprise Stat Buttons */}
       <div className="bg-white dark:bg-[#12141d] border border-[#CED4DA] dark:border-white/[0.08] rounded shadow-2xs overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#CED4DA] dark:divide-white/[0.08]">
           {/* Left Block: 4 Program Parameters */}
@@ -228,7 +228,7 @@ export const StagingWorkspaceHeader: React.FC<StagingWorkspaceHeaderProps> = ({
             </div>
           </div>
 
-          {/* Right Block: Odoo Stat Buttons (.oe_stat_button) */}
+          {/* Right Block: Enterprise Stat Buttons (.oe_stat_button) */}
           <div className="lg:col-span-5 p-3 bg-[#F8F9FA] dark:bg-zinc-900/40 grid grid-cols-5 gap-1.5 items-stretch">
             {/* Stat: Total Staged */}
             <div className="flex flex-col items-center justify-center p-2 rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#161822] shadow-2xs">

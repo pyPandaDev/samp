@@ -287,7 +287,7 @@ export const CreativeDesignPage: React.FC<CreativeDesignPageProps> = ({
               <span className="hidden sm:inline">Export</span>
             </button>
 
-            {/* View Mode Toggle (Odoo style) */}
+            {/* View Mode Toggle (Enterprise style) */}
             <div className="inline-flex rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-zinc-800 p-0.5 shadow-2xs">
               <button
                 type="button"
@@ -351,7 +351,7 @@ export const CreativeDesignPage: React.FC<CreativeDesignPageProps> = ({
 
       {/* ── 3. Segmented Filter Pills & Control Strip (Aligned to Marketing Desk) ── */}
       <div className="bg-white dark:bg-[#12141d] border-b border-[#E2E8F0] dark:border-white/[0.08] px-6 py-2.5 shrink-0 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Odoo Segmented Stage Filter Pills */}
+        {/* Left: Enterprise Segmented Stage Filter Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
           {stages.map((tab) => {
             const isActive = selectedStage === tab.id;
@@ -424,7 +424,7 @@ export const CreativeDesignPage: React.FC<CreativeDesignPageProps> = ({
             </p>
           </div>
         ) : viewMode === "list" ? (
-          /* Odoo ERP Table View */
+          /* Enterprise ERP Table View */
           <div className="bg-white dark:bg-[#12141d] rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">

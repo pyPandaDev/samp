@@ -44,7 +44,7 @@ export const InspectorSheetHeader: React.FC<InspectorSheetHeaderProps> = ({
 }) => {
   return (
     <>
-      {/* Odoo Smart Stat Buttons Ribbon (Top-Right of Sheet) */}
+      {/* Enterprise Smart Stat Buttons Ribbon (Top-Right of Sheet) */}
       <div className="flex justify-between items-center border-b border-[#E2E8F0] dark:border-white/10 bg-[#FBFBFC] dark:bg-zinc-900/40 flex-wrap">
         <div className="px-5 py-2 flex items-center gap-2 flex-wrap">
           <span className="font-mono text-xs font-bold text-[#714B67] dark:text-purple-300">

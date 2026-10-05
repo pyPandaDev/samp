@@ -15,7 +15,7 @@ import {
 } from "../api";
 import { FeasibilityActivityTimeline } from "./FeasibilityActivityTimeline";
 import { useFeasibilityImageSources } from "../hooks/useFeasibilityImageSources";
-import { formatOdooLogDate, formatOdooDate } from "../utils/dateUtils";
+import { formatLogDate, formatErpDate } from "../utils/dateUtils";
 
 // Modular Sub-Components
 import {
@@ -29,6 +29,8 @@ import {
   ChatterMessageItem,
   ImageLightboxModal,
 } from "./inspector";
+import { CreativeDesignReviewTab } from "./inspector/CreativeDesignReviewTab";
+import { Sparkles } from "lucide-react";
 
 // Domain Parsers & Types
 import {
@@ -95,6 +97,12 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
 
   const activeRequest = localOverride || request;
   const trackType = activeRequest ? getRequestTrackType(activeRequest) : null;
+  const hasDesignScope = Boolean(
+    activeRequest?.requestTypes?.includes("design") ||
+    activeRequest?.requestKind === "design" ||
+    activeRequest?.designRequestId ||
+    (activeRequest?.submittedDesigns && activeRequest.submittedDesigns.length > 0)
+  );
 
   // Feasibility flow states
   const [isConverting, setIsConverting] = useState(false);
@@ -103,11 +111,23 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
   const [isReleasing, setIsReleasing] = useState(false);
   const [submitFeedback, setSubmitFeedback] = useState<string | null>(null);
   const [selectedPreviewImage, setSelectedPreviewImage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("specs");
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (activeRequest?.status === "Creative Output Submitted" || activeRequest?.requestKind === "design") {
+      return "design_review";
+    }
+    return "specs";
+  });
   const [decisionRemark, setDecisionRemark] = useState("");
+
+  useEffect(() => {
+    if (activeRequest?.status === "Creative Output Submitted" || activeRequest?.requestKind === "design") {
+      setActiveTab("design_review");
+    }
+  }, [activeRequest?.id, activeRequest?.status, activeRequest?.requestKind]);
 
   // Chatter State
   const [chatterFeed, setChatterFeed] = useState<ChatterMessageItem[]>([]);
+  const [showChatter, setShowChatter] = useState<boolean>(true);
 
   // Local state for material specification rows and SAMP remarks
   const [localMaterials, setLocalMaterials] = useState<ProgramMaterialItem[]>(
@@ -202,11 +222,11 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
       id: "f-1",
       author: request.createdBy || "Parin D",
       initials: (request.createdBy || "PD").slice(0, 2).toUpperCase(),
-      time: formatOdooLogDate(request.createdAt || request.dateRequestCreated),
+      time: formatLogDate(request.createdAt || request.dateRequestCreated),
       type: "audit",
       title: "Request Logged into System",
       content: `Request registered for account ${request.customer || "General"} with SLA target ${
-        request.sampleRequiredDate ? formatOdooDate(request.sampleRequiredDate) : "Flexible"
+        request.sampleRequiredDate ? formatErpDate(request.sampleRequiredDate) : "Flexible"
       }.`,
     });
 
@@ -216,7 +236,7 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
         id: "f-2",
         author: request.samplingFeasibilityApprovedBy || "SAMP Technical Team",
         initials: (request.samplingFeasibilityApprovedBy || "ST").slice(0, 2).toUpperCase(),
-        time: formatOdooLogDate(request.samplingFeasibilityApprovedDate || request.feasibilityClosedAt),
+        time: formatLogDate(request.samplingFeasibilityApprovedDate || request.feasibilityClosedAt),
         type: "message",
         title: `Technical Evaluation: ${request.samplingFeasibilityResponse}`,
         content: request.samplingFeasibilityRemark || "Technical manufacturing specifications verified feasible.",
@@ -229,7 +249,7 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
         id: "f-3",
         author: request.marketingDecisionBy || "Marketing Authority",
         initials: (request.marketingDecisionBy || "MA").slice(0, 2).toUpperCase(),
-        time: formatOdooLogDate(request.marketingDecisionAt),
+        time: formatLogDate(request.marketingDecisionAt),
         type: "audit",
         title: `Commercial Decision: ${request.marketingDecision}`,
         content: request.marketingDecisionRemark || "Commercial decision recorded.",
@@ -446,13 +466,13 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 animate-smooth-backdrop"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[92vh] max-h-[92vh] flex flex-col bg-[#F1F3F5] dark:bg-[#12141a] border border-[#D8DADD] dark:border-white/10 rounded-sm shadow-2xl overflow-hidden select-text text-xs"
+        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[92vh] max-h-[92vh] flex flex-col bg-[#F1F3F5] dark:bg-[#12141a] border border-[#D8DADD] dark:border-white/10 rounded-md shadow-xl overflow-hidden select-text text-xs animate-smooth-modal"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 1. TOP CONTROL PANEL */}
@@ -471,11 +491,13 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
           onConvertToSampling={handleConvertToSampling}
           onMarketingFinalApprove={handleMarketingFinalApprove}
           setIsReleasing={setIsReleasing}
+          showChatter={showChatter}
+          onToggleChatter={() => setShowChatter((prev) => !prev)}
         />
 
         {/* 2. MAIN WORKSPACE VIEWPORT (SPLIT: FORM SHEET + CHATTER) */}
         <div className="flex-1 flex overflow-hidden">
-          {/* LEFT: ODOO DOCUMENT FORM SHEET */}
+          {/* LEFT: ENTERPRISE ERP DOCUMENT FORM SHEET */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#F1F3F5] dark:bg-[#12141a]">
             {submitFeedback && (
               <div
@@ -663,6 +685,34 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
                           </span>
                         )}
                       </button>
+
+                      {hasDesignScope && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("design_review")}
+                          className={`pb-2.5 border-b-2 transition cursor-pointer select-none flex items-center gap-1.5 whitespace-nowrap ${
+                            activeTab === "design_review"
+                              ? "border-[#714B67] text-[#714B67] dark:text-purple-300 font-bold"
+                              : "border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-zinc-200"
+                          }`}
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-[#714B67] dark:text-purple-300" />
+                          <span>4. Creative Design Output</span>
+                          <span
+                            className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
+                              activeRequest.marketingDecision === "Accepted"
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                : activeRequest.marketingDecision === "Revisions_Requested"
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                                : (activeRequest.submittedDesignsCount || 0) > 0
+                                ? "bg-purple-100 text-[#714B67] dark:bg-purple-950/60 dark:text-purple-300"
+                                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                            }`}
+                          >
+                            {(activeRequest.submittedDesignsCount || 0)}/{(activeRequest.numberOfDesigns || (activeRequest as any).productArtworkNos || (activeRequest as any).qtyDesignCosting || 1)} D
+                          </span>
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
@@ -731,6 +781,19 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
                   />
                 )}
 
+                {/* Tab: Creative Design Review & Output */}
+                {activeTab === "design_review" && hasDesignScope && (
+                  <CreativeDesignReviewTab
+                    request={activeRequest}
+                    onUpdate={() => {
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(new CustomEvent("samp:requests-changed"));
+                      }
+                    }}
+                    onShowFeedback={(msg) => setSubmitFeedback(msg)}
+                  />
+                )}
+
                 {/* Tab 5: Workflow Audit Trail */}
                 {activeTab === "timeline" && trackType === "feasibility_check" && (
                   <div className="py-4">
@@ -744,8 +807,8 @@ export const SampleRequestInspector: React.FC<SampleRequestInspectorProps> = ({
             </div>
           </div>
 
-          {/* RIGHT: NATIVE ODOO CHATTER (.o_chatter) */}
-          <InspectorChatter chatterFeed={chatterFeed} />
+          {/* RIGHT: NATIVE ENTERPRISE ERP CHATTER (.o_chatter) */}
+          {showChatter && <InspectorChatter chatterFeed={chatterFeed} />}
         </div>
       </div>
 

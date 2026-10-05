@@ -83,9 +83,9 @@ export function DataTable<T>({
   const totalPages = Math.ceil((totalCount ?? data.length) / pageSize) || 1;
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-white dark:bg-[#0b0c10]">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-white dark:bg-[#12141d]">
       {/* Table Utility Bar */}
-      <div className="h-9 px-5 border-b border-zinc-200 dark:border-white/[0.07] flex items-center justify-between gap-3 bg-zinc-50/50 dark:bg-[#0a0b0f] shrink-0">
+      <div className="h-9 px-5 border-b border-zinc-200 dark:border-white/[0.08] flex items-center justify-between gap-3 bg-zinc-50/50 dark:bg-[#141722] shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           {toolbarLeft ?? (
             <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-sans">
@@ -125,10 +125,10 @@ export function DataTable<T>({
       <div className="flex-1 overflow-auto min-h-0 relative">
         <table className="w-full text-left text-[13px] border-collapse min-w-[1080px]">
           {/* Sticky Header */}
-          <thead className="sticky top-0 z-20 bg-zinc-50 dark:bg-[#0f1118] border-b border-zinc-200 dark:border-white/[0.08] shadow-2xs">
+          <thead className="sticky top-0 z-20 bg-zinc-50 dark:bg-[#141722] border-b border-zinc-200 dark:border-white/[0.08] shadow-2xs">
             <tr>
               {enableSelection && (
-                <th className="w-10 px-4 py-2.5 text-center bg-zinc-50 dark:bg-[#0f1018]">
+                <th className="w-10 px-4 py-2.5 text-center bg-zinc-50 dark:bg-[#141722]">
                   <input
                     type="checkbox"
                     checked={isAllSelected}
@@ -164,9 +164,9 @@ export function DataTable<T>({
                         ? "cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 group select-none transition-colors"
                         : "",
                       isStickyLeft
-                        ? "sticky left-0 z-25 bg-zinc-50 dark:bg-[#0f1018] border-r border-zinc-150 dark:border-white/[0.07]"
+                        ? "sticky left-0 z-25 bg-zinc-50 dark:bg-[#141722] border-r border-zinc-200 dark:border-white/[0.08]"
                         : isStickyRight
-                        ? "sticky right-0 z-25 bg-zinc-50 dark:bg-[#0f1018] border-l border-zinc-150 dark:border-white/[0.07]"
+                        ? "sticky right-0 z-25 bg-zinc-50 dark:bg-[#141722] border-l border-zinc-200 dark:border-white/[0.08]"
                         : "",
                     ].join(" ")}
                   >
@@ -300,13 +300,13 @@ export function DataTable<T>({
                               ? `sticky left-0 z-10 border-r border-zinc-100 dark:border-white/[0.035] ${
                                   isSelected
                                     ? "bg-brand-50/60 dark:bg-brand-950/25"
-                                    : "bg-white dark:bg-[#0b0c10] group-hover:bg-zinc-50/80 dark:group-hover:bg-[#161822]"
+                                    : "bg-white dark:bg-[#12141d] group-hover:bg-zinc-50/80 dark:group-hover:bg-[#181c28]"
                                 }`
                               : isStickyRight
                               ? `sticky right-0 z-10 border-l border-zinc-100 dark:border-white/[0.035] ${
                                   isSelected
                                     ? "bg-brand-50/60 dark:bg-brand-950/25"
-                                    : "bg-white dark:bg-[#0b0c10] group-hover:bg-zinc-50/80 dark:group-hover:bg-[#161822]"
+                                    : "bg-white dark:bg-[#12141d] group-hover:bg-zinc-50/80 dark:group-hover:bg-[#181c28]"
                                 }`
                               : "",
                           ].join(" ")}
@@ -325,7 +325,7 @@ export function DataTable<T>({
 
       {/* Pagination Footer */}
       {onPageChange && (
-        <div className="h-10 px-5 bg-white dark:bg-[#0f1118] border-t border-zinc-200 dark:border-white/[0.08] flex items-center justify-between gap-3 shrink-0 select-none">
+        <div className="h-10 px-5 bg-white dark:bg-[#141722] border-t border-zinc-200 dark:border-white/[0.08] flex items-center justify-between gap-3 shrink-0 select-none">
           <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
             <span className="font-bold text-zinc-800 dark:text-zinc-300 tabular-nums">
               {data.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}

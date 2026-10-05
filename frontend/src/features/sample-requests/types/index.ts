@@ -57,6 +57,12 @@ export interface SampleRequestItem {
   trend?: string | null;
   targetAudience?: string | null;
   referenceImage?: string | null;
+  folderPath?: string;
+  submittedDesignsCount?: number;
+  submittedDesigns?: SubmittedDesignItem[];
+  marketingDecisionRemarks?: string;
+  selectedMockupDesigns?: string[];
+  mockupRequested?: boolean;
   createdAt: string;
   updatedAt?: string;
   plantFeasibilityResponse?: "Yes" | "No" | "Maybe" | null;
@@ -68,7 +74,7 @@ export interface SampleRequestItem {
   feasibilityClosedAt?: string | null;
   feasibilityClosedBy?: "plant" | "sampling" | null;
   isRespondedOnTime?: boolean | null;
-  marketingDecision?: "Accepted" | "Rejected" | null;
+  marketingDecision?: "Accepted" | "Rejected" | "Revisions_Requested" | null;
   marketingDecisionBy?: string | null;
   marketingDecisionAt?: string | null;
   marketingDecisionRemark?: string | null;
@@ -78,7 +84,7 @@ export interface SampleRequestItem {
   convertedSrNumber?: string | null;
   convertedAt?: string | null;
   convertedBy?: string | null;
-  activities?: FeasibilityActivityItem[];
+  activities?: (FeasibilityActivityItem | ProgramActivityItem)[];
   referenceImages?: string[];
   referenceImageNames?: string[];
   referenceLinks?: string[];
@@ -345,6 +351,13 @@ export interface DesignRequest {
   status: SampleStatus | string;
   createdBy: string;
   updatedBy: string;
+  folderPath?: string;
+  submittedDesignsCount?: number;
+  submittedDesigns?: SubmittedDesignItem[];
+  marketingDecision?: "Accepted" | "Revisions_Requested" | null;
+  marketingDecisionRemarks?: string;
+  selectedMockupDesigns?: string[];
+  mockupRequested?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -378,6 +391,14 @@ export interface DielineItem {
   fluteGrade?: string;
   grainDirection: "Parallel to Spine" | "Perpendicular to Crease";
   fileFormats: string[];
+  selectedDesigns?: string[];
+  folderPath?: string;
+}
+
+export interface SubmittedDesignItem {
+  code: string; // e.g. "D1", "D2"
+  shutterstockNo: string;
+  remark: string;
 }
 
 export interface CreativeBriefItem {
@@ -391,7 +412,7 @@ export interface CreativeBriefItem {
   designer: string;
   colorSpecs: string;
   proofVersion: string;
-  proofStatus: "Brief Intake" | "In Concept" | "Client Review" | "Revisions Requested" | "Prepress Approved";
+  proofStatus: "Brief Intake" | "In Concept" | "Client Review" | "Revisions Requested" | "Prepress Approved" | "Creative Output Submitted" | "Design Approved";
   dueDate: string;
   dimensions: string;
   finishingNotes: string;
@@ -400,6 +421,13 @@ export interface CreativeBriefItem {
   bleedMm: number;
   clientFeedback?: string;
   accentColor: string;
+  folderPath?: string;
+  submittedDesignsCount?: number;
+  submittedDesigns?: SubmittedDesignItem[];
+  marketingDecision?: "Accepted" | "Revisions_Requested" | null;
+  marketingDecisionRemarks?: string;
+  selectedMockupDesigns?: string[];
+  mockupRequested?: boolean;
 }
 
 export interface CostingItem {

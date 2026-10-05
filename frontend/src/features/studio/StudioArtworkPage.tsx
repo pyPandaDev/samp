@@ -280,7 +280,7 @@ export const StudioArtworkPage: React.FC<StudioArtworkPageProps> = ({
 
       {/* ── 3. Segmented Filter Pills & Control Strip (Aligned to Marketing Desk) ── */}
       <div className="bg-white dark:bg-[#12141d] border-b border-[#E2E8F0] dark:border-white/[0.08] px-6 py-2.5 shrink-0 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Odoo Segmented Stage Filter Pills */}
+        {/* Left: Enterprise Segmented Stage Filter Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
           {stages.map((tab) => {
             const isActive = selectedStage === tab.id;
@@ -368,7 +368,7 @@ export const StudioArtworkPage: React.FC<StudioArtworkPageProps> = ({
             </p>
           </div>
         ) : viewMode === "list" ? (
-          /* Odoo ERP Table View */
+          /* Enterprise ERP Table View */
           <div className="bg-white dark:bg-[#12141d] rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -411,7 +411,21 @@ export const StudioArtworkPage: React.FC<StudioArtworkPageProps> = ({
                         </div>
                       </td>
                       <td className="py-2.5 px-3 text-neutral-900 dark:text-zinc-100 font-medium">
-                        {d.title}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span>{d.title}</span>
+                          {d.selectedDesigns && d.selectedDesigns.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              {d.selectedDesigns.map((code) => (
+                                <span
+                                  key={code}
+                                  className="px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 font-mono text-[10px] font-bold text-purple-700 dark:text-purple-300"
+                                >
+                                  {code}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="py-2.5 px-3 text-neutral-600 dark:text-zinc-400 whitespace-nowrap">
                         {d.client}
@@ -500,6 +514,18 @@ export const StudioArtworkPage: React.FC<StudioArtworkPageProps> = ({
                         <h4 className="text-xs font-semibold text-neutral-900 dark:text-zinc-100 line-clamp-2 mb-1.5">
                           {item.title}
                         </h4>
+                        {item.selectedDesigns && item.selectedDesigns.length > 0 && (
+                          <div className="flex items-center gap-1 mb-1.5 flex-wrap">
+                            {item.selectedDesigns.map((code) => (
+                              <span
+                                key={code}
+                                className="px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 font-mono text-[9.5px] font-bold text-purple-700 dark:text-purple-300"
+                              >
+                                {code}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <div className="text-[11px] text-neutral-500 mb-1 truncate">
                           {item.client}
                         </div>

@@ -99,8 +99,15 @@ export const CreativeWorkDesk: React.FC<CreativeWorkDeskProps> = ({ user }) => {
       event.preventDefault();
       void loadData().finally(() => window.dispatchEvent(new Event("app:refresh-complete")));
     };
+    const handleRequestsChanged = () => {
+      void loadData();
+    };
     window.addEventListener("app:refresh-requested", handleRefresh);
-    return () => window.removeEventListener("app:refresh-requested", handleRefresh);
+    window.addEventListener("samp:requests-changed", handleRequestsChanged);
+    return () => {
+      window.removeEventListener("app:refresh-requested", handleRefresh);
+      window.removeEventListener("samp:requests-changed", handleRequestsChanged);
+    };
   }, [loadData]);
 
   // Design scoped requests
@@ -174,7 +181,7 @@ export const CreativeWorkDesk: React.FC<CreativeWorkDeskProps> = ({ user }) => {
         </div>
       )}
 
-      {/* Top Odoo 19 Navigation Tabs Ribbon */}
+      {/* Top Enterprise ERP Navigation Tabs Ribbon */}
       <div className="bg-white dark:bg-[#12141d] border-b border-[#E2E8F0] dark:border-white/[0.08] px-6 py-2 flex items-center justify-between shrink-0 shadow-2xs z-10">
         <div className="flex items-center gap-1.5">
           {/* Tab 1: Overview */}

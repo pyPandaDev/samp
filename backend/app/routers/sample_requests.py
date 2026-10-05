@@ -281,6 +281,75 @@ async def update_design_request(
     return record
 
 
+@router.post("/api/v1/design-requests/{id}/submit-output", summary="Submit creative output with folder path and design breakdown")
+async def submit_creative_output(
+    id: int,
+    request: Request,
+    service: DesignRequestService = Depends(get_design_request_service),
+):
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    folder_path = body.get("folder_path") or ""
+    submitted_designs_count = int(body.get("submitted_designs_count", 0))
+    submitted_designs = body.get("submitted_designs", [])
+
+    record = service.submit_creative_output(
+        item_id=id,
+        folder_path=folder_path,
+        submitted_designs_count=submitted_designs_count,
+        submitted_designs=submitted_designs,
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="Design request not found")
+    return {"success": True, "data": record}
+
+
+@router.post("/api/v1/design-requests/{id}/marketing-decision", summary="Marketing decision on submitted designs (Accept or Request Remaining)")
+async def record_marketing_decision(
+    id: int,
+    request: Request,
+    service: DesignRequestService = Depends(get_design_request_service),
+):
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    decision = body.get("decision")
+    if not decision:
+        raise HTTPException(status_code=422, detail="Decision is required ('Accepted' or 'Revisions_Requested')")
+
+    remarks = body.get("remarks")
+    record = service.record_marketing_decision(item_id=id, decision=decision, remarks=remarks)
+    if not record:
+        raise HTTPException(status_code=404, detail="Design request not found")
+    return {"success": True, "data": record}
+
+
+@router.post("/api/v1/design-requests/{id}/request-mockup", summary="Request CAD Mockup for selected designs")
+async def request_mockup(
+    id: int,
+    request: Request,
+    service: DesignRequestService = Depends(get_design_request_service),
+):
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    selected_designs = body.get("selected_designs", [])
+    if not selected_designs or not isinstance(selected_designs, list):
+        raise HTTPException(status_code=422, detail="selected_designs must be a non-empty array of design codes (e.g. ['D1', 'D3'])")
+
+    record = service.request_mockup(item_id=id, selected_designs=selected_designs)
+    if not record:
+        raise HTTPException(status_code=404, detail="Design request not found")
+    return {"success": True, "data": record}
+
+
 @router.delete("/api/v1/design-requests/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete design request")
 def delete_design_request(
     id: int,
@@ -305,8 +374,36 @@ async def update_creative_brief(id: str, request: Request):
 
 
 @router.get("/api/v1/studio/dielines", response_model=List[Dict[str, Any]], summary="List studio dielines")
-def list_studio_dielines():
-    return []
+def list_studio_dielines(db: Session = Depends(get_db)):
+    from app.models.sample_request import DesignRequest
+    items: List[Dict[str, Any]] = []
+    try:
+        records = db.query(DesignRequest).filter(DesignRequest.mockup_requested.is_(True)).all()
+        for r in records:
+            designs = r.selected_mockup_designs or []
+            design_str = ", ".join(designs) if isinstance(designs, list) else str(designs)
+            items.append({
+                "id": f"dl-mockup-{r.id}",
+                "dielineCode": f"DL-26-MOCK-{r.id:03d}",
+                "srNumber": r.sr_number or f"SR-26-{r.id:04d}",
+                "boxFormat": "Folding Carton",
+                "title": f"{r.product_description or 'Packaging'} (CAD Mockups: {design_str})",
+                "client": r.customer_name or "Customer",
+                "dimensions": "210 × 148 × 25 mm",
+                "substrate": "350 GSM Cyber Xpack FBB",
+                "caliperMicrons": 450,
+                "machineCompatibility": "Kongsberg Sample Table",
+                "status": "CAD Intake",
+                "dueDate": str(r.design_required_date) if r.design_required_date else "2026-11-01",
+                "targetPlant": "1505- Khaniwade",
+                "grainDirection": "Parallel to Spine",
+                "fileFormats": [".DXF", ".PDF"],
+                "selectedDesigns": designs if isinstance(designs, list) else [],
+                "folderPath": r.folder_path or "",
+            })
+    except Exception:
+        pass
+    return items
 
 
 @router.patch("/api/v1/studio/dielines/{id}", summary="Update studio dieline")

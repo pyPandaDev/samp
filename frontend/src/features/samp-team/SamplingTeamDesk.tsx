@@ -7,7 +7,7 @@ import { fetchAllMarketingRequestsApi } from "@/features/sample-requests/api";
 import { SampFeasibilityReviewPage } from "./feasibility/SampFeasibilityReviewPage";
 import { SamplingProgramPlanningView } from "./programs/SamplingProgramPlanningView";
 import { ProgramPlanningInspectorModal } from "@/features/sample-requests/programs/components/ProgramPlanningInspectorModal";
-import { formatOdooDate } from "@/features/sample-requests/utils/dateUtils";
+import { formatErpDate } from "@/features/sample-requests/utils/dateUtils";
 import {
   FlaskConical,
   CheckCircle2,
@@ -428,7 +428,7 @@ export const SamplingTeamDesk: React.FC<SamplingTeamDeskProps> = ({ user }) => {
                         <div className="shrink-0 flex items-center gap-2">
                           {req.sampleRequiredDate && (
                             <span className="text-[10px] font-mono text-neutral-400 hidden sm:block">
-                              Due: {formatOdooDate(req.sampleRequiredDate)}
+                              Due: {formatErpDate(req.sampleRequiredDate)}
                             </span>
                           )}
                           <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-900/40">

@@ -257,7 +257,7 @@ export const ProgramPlanningWorkspace: React.FC<ProgramPlanningWorkspaceProps> =
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#F8F9FA] dark:bg-[#0b0c10] text-zinc-900 dark:text-zinc-100 overflow-y-auto select-text">
       {/* ── 1. Page Header (Exact Match to Image 1 & 3 Breadcrumbs) ── */}
-      <header className="border-b border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#12141d] px-6 py-3 sticky top-0 z-20 shadow-2xs backdrop-blur-md">
+      <header className="border-b border-[#E2E8F0] dark:border-white/[0.08] bg-white dark:bg-[#12141d] px-6 py-3 sticky top-0 z-20 shadow-2xs">
         <div className="w-full flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button

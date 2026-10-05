@@ -41,6 +41,25 @@ export function mapDesignRequest(item: Record<string, unknown>): DesignRequest {
     status: String(item.status || "Draft (Pre-SMT)"),
     createdBy: String(item.created_by || item.createdBy || "Marketing Specialist"),
     updatedBy: String(item.updated_by || item.updatedBy || ""),
+    folderPath: typeof item.folder_path === "string" ? item.folder_path : typeof item.folderPath === "string" ? item.folderPath : undefined,
+    submittedDesignsCount: Number(item.submitted_designs_count ?? item.submittedDesignsCount ?? 0),
+    submittedDesigns: Array.isArray(item.submitted_designs)
+      ? (item.submitted_designs as any[]).map((d) => ({
+          code: String(d.code || ""),
+          shutterstockNo: String(d.shutterstock_no || d.shutterstockNo || ""),
+          remark: String(d.remark || ""),
+        }))
+      : Array.isArray((item as any).submittedDesigns)
+      ? (item as any).submittedDesigns
+      : [],
+    marketingDecision: (item.marketing_decision || (item as any).marketingDecision || null) as any,
+    marketingDecisionRemarks: typeof item.marketing_decision_remarks === "string" ? item.marketing_decision_remarks : typeof (item as any).marketingDecisionRemarks === "string" ? (item as any).marketingDecisionRemarks : undefined,
+    selectedMockupDesigns: Array.isArray(item.selected_mockup_designs)
+      ? (item.selected_mockup_designs as string[])
+      : Array.isArray((item as any).selectedMockupDesigns)
+      ? ((item as any).selectedMockupDesigns as string[])
+      : [],
+    mockupRequested: Boolean(item.mockup_requested || (item as any).mockupRequested),
     createdAt: String(item.created_at || item.createdAt || ""),
     updatedAt: String(item.updated_at || item.updatedAt || ""),
   };
@@ -71,6 +90,13 @@ export function mapDesignRequestToSampleRequest(item: DesignRequest): SampleRequ
     trend: item.trend,
     targetAudience: item.targetAudience,
     referenceImage: item.referenceImage,
+    folderPath: item.folderPath,
+    submittedDesignsCount: item.submittedDesignsCount,
+    submittedDesigns: item.submittedDesigns,
+    marketingDecision: item.marketingDecision,
+    marketingDecisionRemarks: item.marketingDecisionRemarks,
+    selectedMockupDesigns: item.selectedMockupDesigns,
+    mockupRequested: item.mockupRequested,
     createdAt: item.createdAt,
     requestTypes: ["design"],
     creationMode: "marketing_request",
@@ -207,6 +233,25 @@ export function mapSampleRequest(item: ApiSampleRequest, fallbackDate = ""): Sam
         : [];
       return explicitLinks;
     })(),
+    folderPath: text(item.folder_path ?? (item as any).folderPath),
+    submittedDesignsCount: Number(item.submitted_designs_count ?? (item as any).submittedDesignsCount ?? 0),
+    submittedDesigns: Array.isArray(item.submitted_designs)
+      ? (item.submitted_designs as any[]).map((d) => ({
+          code: String(d.code || ""),
+          shutterstockNo: String(d.shutterstock_no || d.shutterstockNo || ""),
+          remark: String(d.remark || ""),
+        }))
+      : Array.isArray((item as any).submittedDesigns)
+      ? (item as any).submittedDesigns
+      : [],
+    marketingDecision: (item.marketing_decision || (item as any).marketingDecision || null) as any,
+    marketingDecisionRemarks: text(item.marketing_decision_remarks || (item as any).marketingDecisionRemarks) || undefined,
+    selectedMockupDesigns: Array.isArray(item.selected_mockup_designs)
+      ? (item.selected_mockup_designs as string[])
+      : Array.isArray((item as any).selectedMockupDesigns)
+      ? ((item as any).selectedMockupDesigns as string[])
+      : [],
+    mockupRequested: Boolean(item.mockup_requested || (item as any).mockupRequested),
   };
 }
 
@@ -503,4 +548,67 @@ export async function batchDeleteAnyRequestsApi(requests: SampleRequestItem[]): 
     console.error("Error batch deleting requests:", err);
     return false;
   }
+}
+
+export async function submitCreativeOutputApi(
+  id: number | string,
+  payload: {
+    folder_path: string;
+    submitted_designs_count: number;
+    submitted_designs: Array<{ code: string; shutterstockNo?: string; shutterstock_no?: string; remark: string }>;
+  }
+): Promise<any> {
+  const numericId = typeof id === "string" ? parseInt(id.replace("design-", ""), 10) : id;
+  const normalizedDesigns = payload.submitted_designs.map((d) => ({
+    code: d.code,
+    shutterstock_no: (d as any).shutterstock_no || (d as any).shutterstockNo || "",
+    remark: d.remark || "",
+  }));
+  const res = await apiFetch<any>(`/api/v1/design-requests/${numericId}/submit-output`, {
+    method: "POST",
+    jsonBody: {
+      folder_path: payload.folder_path,
+      submitted_designs_count: payload.submitted_designs_count,
+      submitted_designs: normalizedDesigns,
+    },
+  });
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("samp:requests-changed"));
+  }
+  return res;
+}
+
+export async function recordDesignMarketingDecisionApi(
+  id: number | string,
+  payload: {
+    decision: "Accepted" | "Revisions_Requested";
+    remarks?: string;
+  }
+): Promise<any> {
+  const numericId = typeof id === "string" ? parseInt(id.replace("design-", ""), 10) : id;
+  const res = await apiFetch<any>(`/api/v1/design-requests/${numericId}/marketing-decision`, {
+    method: "POST",
+    jsonBody: payload,
+  });
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("samp:requests-changed"));
+  }
+  return res;
+}
+
+export async function requestDesignMockupApi(
+  id: number | string,
+  payload: {
+    selected_designs: string[];
+  }
+): Promise<any> {
+  const numericId = typeof id === "string" ? parseInt(id.replace("design-", ""), 10) : id;
+  const res = await apiFetch<any>(`/api/v1/design-requests/${numericId}/request-mockup`, {
+    method: "POST",
+    jsonBody: payload,
+  });
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("samp:requests-changed"));
+  }
+  return res;
 }

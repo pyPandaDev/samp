@@ -17,6 +17,7 @@ import {
   Calendar,
   FileText,
   ExternalLink,
+  PanelRightClose,
 } from "lucide-react";
 import { SampleRequestItem } from "../../types";
 import {
@@ -28,7 +29,7 @@ import {
   addProgramNoteApi,
   mapProgramRequestToSampleRequest,
 } from "@/infrastructure/api/programsApi";
-import { formatOdooDate, formatOdooLogDate } from "../../utils/dateUtils";
+import { formatErpDate, formatLogDate } from "../../utils/dateUtils";
 import {
   ProgramChatterFeed,
   ProgramMaterialReviewItem,
@@ -80,6 +81,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
 
   // Tab State: 1. specs (Material Matrix), 2. scope (Campaign Scope), 3. plant (Plant Specs)
   const [activeTab, setActiveTab] = useState<"specs" | "scope" | "plant">("specs");
+  const [showChatter, setShowChatter] = useState<boolean>(true);
 
   // Keep synced internal request for immediate chatter updates
   const [internalRequest, setInternalRequest] = useState<SampleRequestItem | null>(null);
@@ -95,7 +97,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Inline "Add a Line" Row state (Authentic Odoo behavior)
+  // Inline "Add a Line" Row state (Authentic Enterprise behavior)
   const [isAddingRow, setIsAddingRow] = useState(false);
   const [newMaterialType, setNewMaterialType] = useState("");
   const [newSupplierName, setNewSupplierName] = useState("");
@@ -199,6 +201,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
   };
 
   const handleCopyCode = () => {
+    if (!activeRequest) return;
     const code = activeRequest.srNumber || activeRequest.materialCode || `PG-${activeRequest.id}`;
     navigator.clipboard.writeText(code);
     setCopiedCode(true);
@@ -286,7 +289,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
     }
   };
 
-  // Save new inline material row (Marketing Odoo "+ Add a Line")
+  // Save new inline material row (Marketing Enterprise "+ Add a Line")
   const handleSaveNewInlineRow = async () => {
     if (!newMaterialType.trim()) {
       setErrorMessage("Please specify a Material Type.");
@@ -378,25 +381,27 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
   };
 
 
+  if (!isOpen || !activeRequest) return null;
+
   const totalFlaggedCols = rows.reduce((acc, r) => acc + r.highlightedCols.length, 0);
   const totalRemarksEntered = rows.filter((r) => r.sampRemarkText.trim() || r.highlightedCols.length > 0).length;
   const isReviewed =
-    request.status?.toLowerCase().includes("reviewed") ||
-    request.status?.toLowerCase().includes("approved");
+    activeRequest.status?.toLowerCase().includes("reviewed") ||
+    activeRequest.status?.toLowerCase().includes("approved");
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 animate-smooth-backdrop"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[92vh] max-h-[92vh] flex flex-col bg-[#F1F3F5] dark:bg-[#0c0d12] border border-[#D8DADD] dark:border-white/10 rounded-sm shadow-2xl overflow-hidden select-text text-xs"
+        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[92vh] max-h-[92vh] flex flex-col bg-[#F1F3F5] dark:bg-[#0c0d12] border border-[#D8DADD] dark:border-white/10 rounded-md shadow-xl overflow-hidden select-text text-xs animate-smooth-modal"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ══════════════════════════════════════════════════════════════════
-            1. TOP CONTROL PANEL (EXACT ODOO ERP THEME ACCORDING TO APP)
+            1. TOP CONTROL PANEL (EXACT ENTERPRISE ERP ERP THEME ACCORDING TO APP)
         ══════════════════════════════════════════════════════════════════ */}
         <div className="bg-white dark:bg-[#1a1c24] border-b border-[#D8DADD] dark:border-white/10 px-4 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-2xs">
           {/* Left Action Buttons */}
@@ -467,7 +472,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
             )}
           </div>
 
-          {/* Right: Authentic Odoo Statusbar Polygon Stepper */}
+          {/* Right: Authentic Enterprise Statusbar Polygon Stepper */}
           <div className="flex items-center gap-2">
             <div className="o_statusbar_status select-none">
               <div className="o_arrow_button done">1. Program Created</div>
@@ -493,6 +498,28 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
                 4. Production Handoff
               </div>
             </div>
+
+            {/* Chatter Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setShowChatter((prev) => !prev)}
+              className={`h-7 px-2 rounded flex items-center gap-1.5 text-[11px] font-medium border transition cursor-pointer ${
+                showChatter
+                  ? "bg-neutral-100 dark:bg-zinc-800 text-neutral-700 dark:text-zinc-200 border-[#CED4DA] dark:border-zinc-700 shadow-2xs"
+                  : "bg-white dark:bg-zinc-900 text-neutral-500 hover:text-neutral-900 dark:text-zinc-400 dark:hover:text-zinc-100 border-[#CED4DA] dark:border-zinc-700"
+              }`}
+              title={showChatter ? "Collapse Chatter (Full Width Matrix)" : "Expand Chatter Panel"}
+              aria-label={showChatter ? "Hide Chatter Panel" : "Show Chatter Panel"}
+            >
+              <PanelRightClose
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  showChatter ? "" : "rotate-180"
+                }`}
+              />
+              <span className="hidden sm:inline">
+                {showChatter ? "Hide Chatter" : "Chatter"}
+              </span>
+            </button>
 
             {/* Modal Close [X] */}
             <button
@@ -524,11 +551,11 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
             2. MAIN WORKSPACE VIEWPORT (SPLIT: FORM SHEET + CHATTER FEED)
         ══════════════════════════════════════════════════════════════════ */}
         <div className="flex-1 flex overflow-hidden">
-          {/* LEFT: FORM SHEET (AUTHENTIC ODOO DOCUMENT CANVAS) */}
+          {/* LEFT: FORM SHEET (AUTHENTIC ENTERPRISE ERP DOCUMENT CANVAS) */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#F1F3F5] dark:bg-[#0c0d12]">
             <div className="o_form_sheet max-w-5xl mx-auto rounded-sm bg-white dark:bg-[#12141d] border border-[#D8DADD] dark:border-white/10 shadow-sm overflow-hidden">
               
-              {/* Odoo Sheet Header with Smart Stats Ribbon */}
+              {/* Enterprise Sheet Header with Smart Stats Ribbon */}
               <div className="flex justify-between items-center border-b border-[#E2E8F0] dark:border-white/10 bg-[#FBFBFC] dark:bg-zinc-900/40 flex-wrap">
                 <div className="px-5 py-2.5 flex items-center gap-2 flex-wrap">
                   <span className="font-mono text-xs font-bold text-[#714B67] dark:text-purple-300">
@@ -544,7 +571,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
                   </span>
                 </div>
 
-                {/* Odoo Smart Stat Buttons */}
+                {/* Enterprise Smart Stat Buttons */}
                 <div className="flex items-center flex-wrap">
                   <div className="oe_stat_button text-left" title="Total Material Specifications">
                     <div className="text-[#017E84]">
@@ -679,7 +706,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
                 </div>
 
                 {/* ══════════════════════════════════════════════════════════════════
-                    TAB 1: AUTHENTIC ODOO MATERIAL SPECIFICATIONS TABLE
+                    TAB 1: AUTHENTIC ENTERPRISE ERP MATERIAL SPECIFICATIONS TABLE
                 ══════════════════════════════════════════════════════════════════ */}
                 {activeTab === "specs" && (
                   <div className="py-4 space-y-3">
@@ -697,7 +724,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
                         )}
                       </div>
 
-                      {/* Odoo Style "+ Add a Line" Button (Marketing only) */}
+                      {/* Enterprise Style "+ Add a Line" Button (Marketing only) */}
                       {!isSamplingMode && !isAddingRow && (
                         <button
                           type="button"
@@ -710,7 +737,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
                       )}
                     </div>
 
-                    {/* Authentic Odoo Table Container */}
+                    {/* Authentic Enterprise Table Container */}
                     <div className="border border-[#CED4DA] dark:border-zinc-700 rounded overflow-x-auto shadow-2xs bg-white dark:bg-[#12141d]">
                       <table className="w-full text-left text-xs border-collapse">
                         <thead>
@@ -1000,7 +1027,7 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
                             );
                           })}
 
-                          {/* Authentic Odoo Inline "Add a Line" Row (Marketing Mode) */}
+                          {/* Authentic Enterprise Inline "Add a Line" Row (Marketing Mode) */}
                           {isAddingRow && (
                             <tr className="bg-purple-50/50 dark:bg-purple-950/20 border-b border-purple-200 dark:border-purple-800">
                               <td className="p-2 border-r text-center font-mono text-[#714B67] font-bold">
@@ -1184,13 +1211,15 @@ export const ProgramPlanningInspectorModal: React.FC<ProgramPlanningInspectorMod
           </div>
 
           {/* RIGHT: CHATTER / AUDIT TRAIL FEED */}
-          <ProgramChatterFeed
-            request={activeRequest}
-            materialRows={rows}
-            isSamplingMode={isSamplingMode}
-            onAddNote={handleAddNote}
-            currentUser={currentUser || user}
-          />
+          {showChatter && (
+            <ProgramChatterFeed
+              request={activeRequest}
+              materialRows={rows}
+              isSamplingMode={isSamplingMode}
+              onAddNote={handleAddNote}
+              currentUser={currentUser || user}
+            />
+          )}
         </div>
 
 

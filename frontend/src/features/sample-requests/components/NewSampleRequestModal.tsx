@@ -565,15 +565,15 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60"
+        className="fixed inset-0 bg-black/50 animate-smooth-backdrop"
         onClick={onClose}
         aria-hidden="true"
       />
 
       <div className="flex min-h-full items-center justify-center p-3 sm:p-5">
-        <div className="relative w-full max-w-4xl bg-[#F1F3F5] dark:bg-[#12141a] border border-[#D8DADD] dark:border-white/[0.08] rounded-xl shadow-2xl select-text overflow-hidden transition-all duration-200">
+        <div className="relative w-full max-w-4xl bg-[#F1F3F5] dark:bg-[#12141a] border border-[#D8DADD] dark:border-white/[0.08] rounded-xl shadow-xl select-text overflow-hidden animate-smooth-modal">
           
-          {/* Odoo 19 Header Bar */}
+          {/* Enterprise ERP Header Bar */}
           <div className="flex items-center justify-between px-6 py-3.5 bg-[#714B67] text-white shrink-0 border-b border-[#5B3C53]">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded bg-white/15 flex items-center justify-center text-white shrink-0">
@@ -623,7 +623,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
             </div>
           </div>
 
-          {/* Odoo 19 Track Switcher Tabs (Only shown when not locked to a specific track) */}
+          {/* Enterprise ERP Track Switcher Tabs (Only shown when not locked to a specific track) */}
           {!lockTrack && (
             <div className="flex items-center gap-1 px-6 bg-[#F8F9FA] dark:bg-[#161822] border-b border-[#D8DADD] dark:border-white/[0.08]">
               <button
@@ -632,7 +632,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                   setSelectedTrack("feasibility_check");
                   setError(null);
                 }}
-                className={`px-4 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-2 transition-all cursor-pointer select-none ${
+                className={`px-4 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-2 transition-colors duration-100 cursor-pointer select-none ${
                   selectedTrack === "feasibility_check"
                     ? "border-[#714B67] text-[#714B67] dark:text-[#E8D7E3] bg-white dark:bg-[#1f212a] font-bold shadow-2xs"
                     : "border-transparent text-[#64748B] hover:text-[#1E293B] hover:bg-black/[0.02]"
@@ -647,7 +647,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                   setSelectedTrack("marketing_request");
                   setError(null);
                 }}
-                className={`px-4 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-2 transition-all cursor-pointer select-none ${
+                className={`px-4 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-2 transition-colors duration-100 cursor-pointer select-none ${
                   selectedTrack === "marketing_request"
                     ? "border-[#714B67] text-[#714B67] dark:text-[#E8D7E3] bg-white dark:bg-[#1f212a] font-bold shadow-2xs"
                     : "border-transparent text-[#64748B] hover:text-[#1E293B] hover:bg-black/[0.02]"
@@ -662,7 +662,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                   setSelectedTrack("program_planning");
                   setError(null);
                 }}
-                className={`px-4 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-2 transition-all cursor-pointer select-none ${
+                className={`px-4 py-2.5 text-xs font-semibold border-b-2 flex items-center gap-2 transition-colors duration-100 cursor-pointer select-none ${
                   selectedTrack === "program_planning"
                     ? "border-[#714B67] text-[#714B67] dark:text-[#E8D7E3] bg-white dark:bg-[#1f212a] font-bold shadow-2xs"
                     : "border-transparent text-[#64748B] hover:text-[#1E293B] hover:bg-black/[0.02]"
@@ -682,7 +682,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
               </div>
             )}
 
-            {/* TAB 1: FEASIBILITY CHECK FORM (Odoo Document Sheet) */}
+            {/* TAB 1: FEASIBILITY CHECK FORM (Enterprise Document Sheet) */}
             {selectedTrack === "feasibility_check" && (
               <form onSubmit={handleSubmitFeasibility} className="space-y-4">
                 <div className="bg-white dark:bg-[#1a1c24] border border-[#D8DADD] dark:border-white/[0.08] rounded-lg p-5 sm:p-6 shadow-2xs space-y-5">
@@ -741,7 +741,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                                 key={type.id}
                                 type="button"
                                 onClick={() => setSelectedFeasibilityType(type.id)}
-                                className={`text-left p-3 rounded-lg border transition-all cursor-pointer select-none flex flex-col justify-between gap-1 relative ${
+                                className={`text-left p-3 rounded-lg border transition-colors duration-100 cursor-pointer select-none flex flex-col justify-between gap-1 relative ${
                                   isOther ? "sm:col-span-2" : ""
                                 } ${
                                   isSelected
@@ -802,7 +802,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                           placeholder="Provide complete technical context, material GSM, binding dimensions, special coatings, machine tolerances, and manufacturing evaluation criteria..."
                           value={feasibilityDescription}
                           onChange={(e) => setFeasibilityDescription(e.target.value)}
-                          className="w-full p-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 outline-none transition-all resize-none leading-relaxed shadow-2xs"
+                          className="w-full p-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 outline-none transition-colors duration-100 resize-none leading-relaxed shadow-2xs"
                         />
                       </div>
                     </div>
@@ -837,7 +837,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                           placeholder="Enter any additional marketing remarks, client constraints, or special evaluation instructions..."
                           value={releaseRemarks}
                           onChange={(e) => setReleaseRemarks(e.target.value)}
-                          className="w-full p-2.5 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 outline-none transition-all resize-none leading-relaxed shadow-2xs"
+                          className="w-full p-2.5 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 outline-none transition-colors duration-100 resize-none leading-relaxed shadow-2xs"
                         />
                       </div>
 
@@ -865,7 +865,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                             <button
                               type="button"
                               onClick={() => setMediaTab("files")}
-                              className={`flex-1 py-1.5 rounded-md text-[11px] transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                              className={`flex-1 py-1.5 rounded-md text-[11px] transition-colors duration-100 cursor-pointer flex items-center justify-center gap-1.5 ${
                                 mediaTab === "files"
                                   ? "bg-white dark:bg-zinc-700 text-[#714B67] dark:text-[#E8D7E3] shadow-xs font-bold"
                                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 font-medium"
@@ -882,7 +882,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                             <button
                               type="button"
                               onClick={() => setMediaTab("links")}
-                              className={`flex-1 py-1.5 rounded-md text-[11px] transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                              className={`flex-1 py-1.5 rounded-md text-[11px] transition-colors duration-100 cursor-pointer flex items-center justify-center gap-1.5 ${
                                 mediaTab === "links"
                                   ? "bg-white dark:bg-zinc-700 text-[#714B67] dark:text-[#E8D7E3] shadow-xs font-bold"
                                   : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 font-medium"
@@ -912,7 +912,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => fileInputRef.current?.click()}
-                                  className="w-full py-2.5 px-3 rounded-lg border-2 border-dashed border-[#CED4DA] dark:border-zinc-700 hover:border-[#017E84] bg-[#F8F9FA] dark:bg-zinc-900/40 hover:bg-[#017E84]/[0.03] text-zinc-600 dark:text-zinc-400 hover:text-[#017E84] flex items-center justify-between text-xs font-medium transition-all cursor-pointer group shadow-2xs"
+                                  className="w-full py-2.5 px-3 rounded-lg border-2 border-dashed border-[#CED4DA] dark:border-zinc-700 hover:border-[#017E84] bg-[#F8F9FA] dark:bg-zinc-900/40 hover:bg-[#017E84]/[0.03] text-zinc-600 dark:text-zinc-400 hover:text-[#017E84] flex items-center justify-between text-xs font-medium transition-colors duration-100 cursor-pointer group shadow-2xs"
                                 >
                                   <div className="flex items-center gap-2.5">
                                     <div className="w-7 h-7 rounded-md bg-white dark:bg-zinc-800 group-hover:bg-[#017E84]/10 text-zinc-400 group-hover:text-[#017E84] flex items-center justify-center transition-colors border border-[#CED4DA]">
@@ -957,13 +957,13 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                                     handleAddWebLink(e);
                                   }
                                 }}
-                                className="flex-1 h-9 px-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-[#017E84] focus:ring-2 focus:ring-[#017E84]/15 outline-none disabled:opacity-50 transition-all shadow-2xs"
+                                className="flex-1 h-9 px-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-[#017E84] focus:ring-2 focus:ring-[#017E84]/15 outline-none disabled:opacity-50 transition-colors duration-100 shadow-2xs"
                               />
                               <button
                                 type="button"
                                 onClick={handleAddWebLink}
                                 disabled={webLinks.length >= 1 || !linkInput.trim()}
-                                className="h-9 px-3.5 rounded-lg bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-semibold shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs flex items-center gap-1"
+                                className="h-9 px-3.5 rounded-lg bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-semibold shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-100 shadow-xs flex items-center gap-1"
                               >
                                 <Plus className="w-3.5 h-3.5" />
                                 <span>Add</span>
@@ -1067,7 +1067,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="h-9 px-5 rounded bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold cursor-pointer transition-all shadow-xs flex items-center gap-2 disabled:opacity-60 disabled:cursor-wait"
+                      className="h-9 px-5 rounded bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold cursor-pointer transition-colors duration-100 shadow-xs flex items-center gap-2 disabled:opacity-60 disabled:cursor-wait"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>{isSubmitting ? "Submitting..." : "Submit Feasibility Check"}</span>
@@ -1080,7 +1080,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
             {/* TAB 2: STANDARD SAMPLING FORM (Commercial Sample Request Step 1 Intake) */}
             {selectedTrack === "marketing_request" && (
               <form onSubmit={handleSubmitSampling} className="space-y-4">
-                {/* Odoo Step Flow Indicator */}
+                {/* Enterprise Step Flow Indicator */}
                 <div className="flex items-center justify-between px-4 py-2.5 bg-[#F8F9FA] dark:bg-zinc-800/70 border border-[#CED4DA] dark:border-zinc-700 rounded text-xs">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#714B67] text-white text-[11px] font-bold">
@@ -1135,7 +1135,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                         placeholder="e.g. Back to school, Hardcover Notebooks..."
                         value={marketingProgramName}
                         onChange={(e) => setMarketingProgramName(e.target.value)}
-                        className="w-full h-10 px-3.5 rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:border-[#714B67] focus:ring-1 focus:ring-[#714B67] transition-all"
+                        className="w-full h-10 px-3.5 rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:border-[#714B67] focus:ring-1 focus:ring-[#714B67] transition-colors duration-100"
                       />
 
                       <datalist id="open-programs-datalist">
@@ -1198,7 +1198,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                               key={year}
                               type="button"
                               onClick={() => setMarketingProgramYear(year)}
-                              className={`h-10 px-2.5 rounded border text-xs font-semibold transition-all flex items-center justify-between cursor-pointer select-none ${
+                              className={`h-10 px-2.5 rounded border text-xs font-semibold transition-colors duration-100 flex items-center justify-between cursor-pointer select-none ${
                                 isSelected
                                   ? "border-[#714B67] bg-[#714B67]/10 dark:bg-[#714B67]/20 text-[#714B67] dark:text-[#E8D7E3] font-bold ring-1 ring-[#714B67]/30"
                                   : "border-[#CED4DA] dark:border-zinc-800 bg-[#F8F9FA] dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 hover:bg-white"
@@ -1219,7 +1219,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                       <select
                         value={marketingTargetPlant}
                         onChange={(e) => setMarketingTargetPlant(e.target.value)}
-                        className="w-full h-10 px-3 rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67] focus:ring-1 focus:ring-[#714B67] transition-all cursor-pointer"
+                        className="w-full h-10 px-3 rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67] focus:ring-1 focus:ring-[#714B67] transition-colors duration-100 cursor-pointer"
                       >
                         {plants.length > 0 ? (
                           plants.map((plant) => (
@@ -1261,7 +1261,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="h-9 px-5 rounded bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold cursor-pointer transition-all shadow-xs flex items-center gap-2 disabled:opacity-60 disabled:cursor-wait"
+                      className="h-9 px-5 rounded bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold cursor-pointer transition-colors duration-100 shadow-xs flex items-center gap-2 disabled:opacity-60 disabled:cursor-wait"
                     >
                       {isSubmitting ? (
                         <span>Initializing Staging...</span>
@@ -1327,7 +1327,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                         value={targetPlant}
                         disabled={isMasterDataLoading || plants.length === 0}
                         onChange={(e) => setTargetPlant(e.target.value)}
-                        className="w-full h-10 px-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 transition-all cursor-pointer shadow-2xs"
+                        className="w-full h-10 px-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 transition-colors duration-100 cursor-pointer shadow-2xs"
                       >
                         {plants.map((item) => (
                           <option key={item.id} value={item.name}>{item.name}</option>
@@ -1347,7 +1347,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                       value={programPlanName}
                       onChange={(e) => setProgramPlanName(e.target.value)}
                       placeholder="e.g. Back-to-School 2026-2027 Hardcover Line"
-                      className="w-full h-10 px-3.5 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 transition-all shadow-2xs"
+                      className="w-full h-10 px-3.5 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 transition-colors duration-100 shadow-2xs"
                     />
                   </div>
 
@@ -1359,7 +1359,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                     <select
                       value={programPlanYear}
                       onChange={(e) => setProgramPlanYear(e.target.value)}
-                      className="w-full h-10 px-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs font-mono font-medium text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 cursor-pointer transition-all shadow-2xs"
+                      className="w-full h-10 px-3 rounded-lg border border-[#CED4DA] dark:border-zinc-700/80 bg-white dark:bg-zinc-900/80 text-xs font-mono font-medium text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67] focus:ring-2 focus:ring-[#714B67]/15 cursor-pointer transition-colors duration-100 shadow-2xs"
                     >
                       {byInfo.businessYearOptions.map((by) => (
                         <option key={by} value={by}>{by}</option>
@@ -1379,7 +1379,7 @@ export const NewSampleRequestModal: React.FC<NewSampleRequestModalProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="h-9 px-5 rounded bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold cursor-pointer transition-all shadow-sm inline-flex items-center justify-center gap-1.5 select-none"
+                    className="h-9 px-5 rounded bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold cursor-pointer transition-colors duration-100 shadow-sm inline-flex items-center justify-center gap-1.5 select-none"
                   >
                     <span>Initialize Program Plan</span>
                     <ArrowRight className="w-4 h-4" />

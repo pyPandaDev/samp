@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { SampleRequestItem, ProgramActivityItem } from "../../types";
-import { formatOdooDate, formatOdooLogDate } from "../../utils/dateUtils";
+import { formatErpDate, formatLogDate } from "../../utils/dateUtils";
 import {
   MessageSquare,
   Clock,
@@ -472,7 +472,7 @@ export const ProgramChatterFeed: React.FC<ProgramChatterFeedProps> = ({
                       </span>
                     </div>
                     <span className="text-[10px] text-neutral-400 font-mono shrink-0">
-                      {formatOdooLogDate(event.timestamp)}
+                      {formatLogDate(event.timestamp)}
                     </span>
                   </div>
 

@@ -26,7 +26,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Image Preview Lightbox"
-      className="fixed inset-0 z-60 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 z-60 bg-black/95 flex items-center justify-center p-4 animate-smooth-backdrop select-none"
       onClick={onClose}
     >
       {/* Lightbox Top Bar */}

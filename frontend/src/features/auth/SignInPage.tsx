@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Lock, Eye, EyeOff, Sun, Moon, AlertCircle, ArrowRight, Loader2, X } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Sun, Moon, ArrowRight, Loader2, X } from "lucide-react";
 import { AuthResponse } from "./types";
 import { API_BASE_URL } from "@/lib/api";
 import { persistAuthSession } from "@/lib/session";
@@ -142,7 +142,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onSignInSuccess }) => {
           className="h-full w-full object-cover object-center scale-105 transition-transform duration-1000"
         />
         {/* Dual overlay: deep dark gradient for text contrast & subtle brand tint */}
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/75 via-zinc-950/60 to-zinc-950/80 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/70 to-zinc-950/90" />
         <div className="absolute inset-0 bg-[#714b67]/10 mix-blend-overlay" />
       </div>
 
@@ -152,7 +152,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onSignInSuccess }) => {
           type="button"
           onClick={toggleTheme}
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white/90 bg-black/40 hover:bg-black/60 border border-white/20 shadow-md backdrop-blur-md transition-all duration-150 cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white/90 bg-black/40 hover:bg-black/60 border border-white/20 shadow-md transition-colors duration-150 cursor-pointer"
         >
           {theme === "dark" ? (
             <>
@@ -173,9 +173,9 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onSignInSuccess }) => {
         <div
           role="alert"
           aria-live="assertive"
-          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 max-w-sm w-[calc(100vw-2.5rem)] animate-in fade-in slide-in-from-bottom-3 duration-200"
+          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 max-w-sm w-[calc(100vw-2.5rem)] animate-smooth-toast"
         >
-          <div className="bg-[#1e293b]/95 backdrop-blur-md text-white px-4 py-3 rounded-md shadow-2xl border border-white/15 flex items-start gap-3 text-xs">
+          <div className="bg-[#1e293b] text-white px-4 py-3 rounded-md shadow-xl border border-white/15 flex items-start gap-3 text-xs">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse mt-1.5 shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
@@ -202,7 +202,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onSignInSuccess }) => {
       {/* Sign-In Card Container */}
       <main className="relative z-10 w-full max-w-[420px]">
         {/* Form Sheet Card */}
-        <div className="bg-white/95 dark:bg-[#12141d]/95 backdrop-blur-xl rounded-xl border border-white/40 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.35)] p-6 sm:p-8 transition-colors duration-150">
+        <div className="bg-white dark:bg-[#12141d] rounded-2xl border border-zinc-200/80 dark:border-white/10 shadow-2xl p-6 sm:p-8 transition-colors duration-150 animate-smooth-modal">
           
           {/* Brand Logo - Bold, Crisp & Prominent inside the card */}
           <div className="flex flex-col items-center mb-6 text-center">
@@ -246,7 +246,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onSignInSuccess }) => {
                   placeholder="Enter your username"
                   autoFocus
                   required
-                  className={`w-full h-10 pl-9 pr-3 text-xs sm:text-[13px] rounded bg-white dark:bg-[#1a1e2c] text-[#1e293b] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 border transition-all duration-150 outline-none ${
+                  className={`w-full h-10 pl-9 pr-3 text-xs sm:text-[13px] rounded bg-white dark:bg-[#1a1e2c] text-[#1e293b] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 border transition-colors duration-100 outline-none ${
                     errorInfo?.field === "identifier"
                       ? "border-rose-500 focus:border-rose-500 ring-2 ring-rose-500/15"
                       : "border-[#ced4da] dark:border-white/15 focus:border-[#714b67] dark:focus:border-[#9d6b91] focus:ring-2 focus:ring-[#714b67]/15 dark:focus:ring-[#9d6b91]/25"
@@ -283,7 +283,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onSignInSuccess }) => {
                   }}
                   placeholder="••••••••••••"
                   required
-                  className={`w-full h-10 pl-9 pr-10 text-xs sm:text-[13px] rounded bg-white dark:bg-[#1a1e2c] text-[#1e293b] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 border transition-all duration-150 outline-none font-mono ${
+                  className={`w-full h-10 pl-9 pr-10 text-xs sm:text-[13px] rounded bg-white dark:bg-[#1a1e2c] text-[#1e293b] dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 border transition-colors duration-100 outline-none font-mono ${
                     errorInfo?.field === "password"
                       ? "border-rose-500 focus:border-rose-500 ring-2 ring-rose-500/15"
                       : "border-[#ced4da] dark:border-white/15 focus:border-[#714b67] dark:focus:border-[#9d6b91] focus:ring-2 focus:ring-[#714b67]/15 dark:focus:ring-[#9d6b91]/25"
@@ -340,6 +340,8 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onSignInSuccess }) => {
                 </>
               )}
             </button>
+
+
           </form>
         </div>
 

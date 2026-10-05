@@ -86,7 +86,7 @@ export const AddProductDesignStep: React.FC<AddProductDesignStepProps> = ({
 
   return (
     <div className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-2xl animate-smooth-modal dark:border-white/[0.08] dark:bg-[#12141d]">
-      {/* Odoo 19 Modal Header */}
+      {/* Enterprise ERP Modal Header */}
       <div className="flex items-center justify-between px-6 py-3.5 bg-[#714B67] text-white shrink-0 border-b border-[#5B3C53]">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded bg-white/15 flex items-center justify-center text-white shrink-0">
@@ -301,7 +301,7 @@ export const AddProductDesignStep: React.FC<AddProductDesignStepProps> = ({
                   <button
                     type="button"
                     onClick={() => onSetMediaTab("files")}
-                    className={`flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded px-2 text-xs transition-all ${
+                    className={`flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded px-2 text-xs transition-colors duration-100 ${
                       mediaTab === "files"
                         ? "bg-white font-semibold text-[#714B67] shadow-sm dark:bg-[#3E2938] dark:text-purple-200"
                         : "font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
@@ -318,7 +318,7 @@ export const AddProductDesignStep: React.FC<AddProductDesignStepProps> = ({
                   <button
                     type="button"
                     onClick={() => onSetMediaTab("links")}
-                    className={`flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded px-2 text-xs transition-all ${
+                    className={`flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded px-2 text-xs transition-colors duration-100 ${
                       mediaTab === "links"
                         ? "bg-white font-semibold text-[#714B67] shadow-sm dark:bg-[#3E2938] dark:text-purple-200"
                         : "font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"

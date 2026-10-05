@@ -9,7 +9,7 @@ import {
 } from "@/features/sample-requests/api";
 import { FeasibilityInspectorModal } from "@/features/sample-requests/components/FeasibilityInspectorModal";
 import { StatusPill } from "@/components/ui/StatusPill";
-import { formatOdooDate, formatOdooLogDate } from "@/features/sample-requests/utils/dateUtils";
+import { formatErpDate, formatLogDate } from "@/features/sample-requests/utils/dateUtils";
 import {
   Search,
   CheckCircle2,
@@ -173,7 +173,7 @@ export const SampFeasibilityReviewPage: React.FC<SampFeasibilityReviewPageProps>
     });
   }, [requests]);
 
-  // Metric Ribbon Calculations (Odoo Live KPI Counters)
+  // Metric Ribbon Calculations (Enterprise Live KPI Counters)
   const metrics = useMemo(() => {
     const total = feasibilityRequests.length;
     const awaitingClaim = feasibilityRequests.filter(
@@ -574,7 +574,7 @@ export const SampFeasibilityReviewPage: React.FC<SampFeasibilityReviewPageProps>
 
       {/* ── Search & Filter Pill Control Strip ── */}
       <div className="bg-white dark:bg-[#12141d] border-b border-[#E2E8F0] dark:border-white/[0.08] px-6 py-2.5 shrink-0 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Odoo Segmented Filter Pills */}
+        {/* Left: Enterprise Segmented Filter Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
           {[
             { id: "all", label: "All Feasibility", count: tabCounts.all },
@@ -685,7 +685,7 @@ export const SampFeasibilityReviewPage: React.FC<SampFeasibilityReviewPageProps>
               )}
             </div>
           ) : (
-            /* ── Table View (Authentic Odoo Master Sheet) ── */
+            /* ── Table View (Authentic Enterprise Master Sheet) ── */
             <div className="bg-white dark:bg-[#12141d] rounded-lg border border-[#CED4DA] dark:border-white/[0.08] shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
@@ -783,10 +783,10 @@ export const SampFeasibilityReviewPage: React.FC<SampFeasibilityReviewPageProps>
                         {/* Target SLA Date */}
                         <td className="py-3 px-4 whitespace-nowrap font-mono text-xs">
                           <div className="text-neutral-800 dark:text-zinc-200 font-medium">
-                            {formatOdooDate(req.sampleRequiredDate || req.dateRequestCreated)}
+                            {formatErpDate(req.sampleRequiredDate || req.dateRequestCreated)}
                           </div>
                           <div className="text-[10px] text-neutral-400">
-                            Raised: {formatOdooDate(req.dateRequestCreated || req.createdAt)}
+                            Raised: {formatErpDate(req.dateRequestCreated || req.createdAt)}
                           </div>
                         </td>
 
@@ -970,7 +970,7 @@ export const SampFeasibilityReviewPage: React.FC<SampFeasibilityReviewPageProps>
                                   <span className="truncate">{req.targetPlant || "All Plants"}</span>
                                 </div>
                                 <span>
-                                  Target: {req.sampleRequiredDate ? formatOdooDate(req.sampleRequiredDate) : "Flexible"}
+                                  Target: {req.sampleRequiredDate ? formatErpDate(req.sampleRequiredDate) : "Flexible"}
                                 </span>
                               </div>
 

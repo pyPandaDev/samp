@@ -1,6 +1,6 @@
 import React from "react";
 import { SampleRequestItem } from "../../types";
-import { formatOdooDate } from "../../utils/dateUtils";
+import { formatErpDate } from "../../utils/dateUtils";
 import {
   Calendar,
   FileText,
@@ -37,7 +37,7 @@ export const FeasibilitySheetHeader: React.FC<FeasibilitySheetHeaderProps> = ({
 }) => {
   return (
     <div className="border-b border-[#E2E8F0] dark:border-white/10">
-      {/* ── Odoo Smart Stat Buttons Ribbon ── */}
+      {/* ── Enterprise Smart Stat Buttons Ribbon ── */}
       <div className="flex justify-between items-center border-b border-[#E2E8F0] dark:border-white/10 bg-[#FBFBFC] dark:bg-zinc-900/40 flex-wrap px-5 py-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-mono text-xs font-bold text-[#714B67] dark:text-purple-300">
@@ -64,7 +64,7 @@ export const FeasibilitySheetHeader: React.FC<FeasibilitySheetHeaderProps> = ({
             <div className="leading-tight">
               <div className="font-bold text-xs text-neutral-900 dark:text-neutral-100 font-mono">
                 {activeRequest.sampleRequiredDate
-                  ? formatOdooDate(activeRequest.sampleRequiredDate)
+                  ? formatErpDate(activeRequest.sampleRequiredDate)
                   : "Flexible"}
               </div>
               <div className="text-[9.5px] text-neutral-400 font-mono">Target SLA</div>
@@ -216,7 +216,7 @@ export const FeasibilitySheetHeader: React.FC<FeasibilitySheetHeaderProps> = ({
               <span className="w-36 text-neutral-500 font-medium shrink-0">Required Target Date:</span>
               <span className="flex-1 font-mono font-semibold text-[#017E84] dark:text-teal-400">
                 {activeRequest.sampleRequiredDate
-                  ? formatOdooDate(activeRequest.sampleRequiredDate)
+                  ? formatErpDate(activeRequest.sampleRequiredDate)
                   : "Flexible"}
               </span>
             </div>
@@ -224,7 +224,7 @@ export const FeasibilitySheetHeader: React.FC<FeasibilitySheetHeaderProps> = ({
             <div className="flex items-baseline">
               <span className="w-36 text-neutral-500 font-medium shrink-0">Logged Date:</span>
               <span className="flex-1 font-mono text-neutral-700 dark:text-zinc-300">
-                {formatOdooDate(activeRequest.dateRequestCreated || activeRequest.createdAt)}
+                {formatErpDate(activeRequest.dateRequestCreated || activeRequest.createdAt)}
               </span>
             </div>
 

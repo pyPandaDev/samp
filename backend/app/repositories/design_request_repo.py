@@ -105,6 +105,13 @@ class DesignRequestRepository(BaseRepository[DesignRequest]):
             "product_description": data.get("product_description", "Creative Design Brief"),
             "design_required_date": data.get("design_required_date"),
             "created_by": data.get("created_by") or "Marketing Specialist",
+            "folder_path": data.get("folder_path"),
+            "submitted_designs_count": data.get("submitted_designs_count", 0),
+            "submitted_designs": data.get("submitted_designs") or [],
+            "marketing_decision": data.get("marketing_decision"),
+            "marketing_decision_remarks": data.get("marketing_decision_remarks"),
+            "selected_mockup_designs": data.get("selected_mockup_designs") or [],
+            "mockup_requested": data.get("mockup_requested", False),
             "created_at": now_iso,
             "updated_at": now_iso,
         }
@@ -128,6 +135,13 @@ class DesignRequestRepository(BaseRepository[DesignRequest]):
                 product_description=record_dict["product_description"],
                 design_required_date=record_dict["design_required_date"],
                 created_by=record_dict["created_by"],
+                folder_path=record_dict["folder_path"],
+                submitted_designs_count=record_dict["submitted_designs_count"],
+                submitted_designs=record_dict["submitted_designs"],
+                marketing_decision=record_dict["marketing_decision"],
+                marketing_decision_remarks=record_dict["marketing_decision_remarks"],
+                selected_mockup_designs=record_dict["selected_mockup_designs"],
+                mockup_requested=record_dict["mockup_requested"],
             )
             self.db.add(db_item)
             self.db.commit()
@@ -219,23 +233,36 @@ class DesignRequestRepository(BaseRepository[DesignRequest]):
                 "program_name": sample_req.get("program_name", ""),
                 "program_year": sample_req.get("program_year", "2026"),
                 "status": sample_req.get("status") or "Draft (Pre-SMT)",
-                "number_of_designs": int(sample_req.get("product_artwork_nos") or 1),
+                "number_of_designs": int(sample_req.get("product_artwork_nos") or sample_req.get("number_of_designs") or sample_req.get("qty_design_costing") or 1),
                 "product_description": sample_req.get("product_description", "Creative Design Brief"),
-                "design_required_date": sample_req.get("target_artwork_date_creative"),
+                "design_required_date": sample_req.get("target_artwork_date_creative") or sample_req.get("sample_required_date"),
                 "created_by": sample_req.get("created_by") or "Marketing Specialist",
+                "folder_path": sample_req.get("folder_path"),
+                "submitted_designs_count": sample_req.get("submitted_designs_count", 0),
+                "submitted_designs": sample_req.get("submitted_designs") or [],
+                "marketing_decision": sample_req.get("marketing_decision"),
+                "marketing_decision_remarks": sample_req.get("marketing_decision_remarks"),
+                "selected_mockup_designs": sample_req.get("selected_mockup_designs") or [],
+                "mockup_requested": sample_req.get("mockup_requested", False),
             })
         else:
-            # Update status
+            # Update status and fields
+            updates = {}
+            for field in ["status", "folder_path", "submitted_designs_count", "submitted_designs", "marketing_decision", "marketing_decision_remarks", "selected_mockup_designs", "mockup_requested"]:
+                if field in sample_req and sample_req[field] is not None:
+                    updates[field] = sample_req[field]
+
             for r in records:
                 if r.get("sr_number") == sr_number:
-                    r["status"] = sample_req.get("status", r["status"])
+                    r.update(updates)
                     r["updated_at"] = datetime.now(timezone.utc).isoformat()
             _write_records(records)
             try:
-                self.db.query(DesignRequest).filter(DesignRequest.sr_number == sr_number).update(
-                    {"status": sample_req.get("status")}, synchronize_session=False
-                )
-                self.db.commit()
+                if updates:
+                    self.db.query(DesignRequest).filter(DesignRequest.sr_number == sr_number).update(
+                        updates, synchronize_session=False
+                    )
+                    self.db.commit()
             except Exception:
                 self.db.rollback()
 
@@ -257,6 +284,13 @@ class DesignRequestRepository(BaseRepository[DesignRequest]):
             "product_description": item.product_description,
             "design_required_date": item.design_required_date,
             "created_by": item.created_by,
+            "folder_path": getattr(item, "folder_path", None),
+            "submitted_designs_count": getattr(item, "submitted_designs_count", 0) or 0,
+            "submitted_designs": getattr(item, "submitted_designs", []) or [],
+            "marketing_decision": getattr(item, "marketing_decision", None),
+            "marketing_decision_remarks": getattr(item, "marketing_decision_remarks", None),
+            "selected_mockup_designs": getattr(item, "selected_mockup_designs", []) or [],
+            "mockup_requested": getattr(item, "mockup_requested", False) or False,
             "created_at": item.created_at.isoformat() if item.created_at else None,
             "updated_at": item.updated_at.isoformat() if item.updated_at else None,
         }

@@ -63,7 +63,7 @@ export const AddProductSamplingStep: React.FC<AddProductSamplingStepProps> = ({
 }) => {
   return (
     <div className="relative w-full max-w-2xl bg-white dark:bg-[#12141d] border border-[#CED4DA] dark:border-white/[0.08] rounded shadow-2xl overflow-hidden animate-smooth-modal max-h-[90vh] flex flex-col">
-      {/* Odoo 19 Modal Header */}
+      {/* Enterprise ERP Modal Header */}
       <div className="flex items-center justify-between px-6 py-3.5 bg-[#714B67] text-white shrink-0 border-b border-[#5B3C53]">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded bg-white/15 flex items-center justify-center text-white shrink-0">
@@ -124,7 +124,7 @@ export const AddProductSamplingStep: React.FC<AddProductSamplingStepProps> = ({
               {/* Full Sample */}
               <div
                 onClick={() => onSetSampleType("full")}
-                className={`p-3 rounded border transition-all cursor-pointer select-none flex items-center justify-between ${
+                className={`p-3 rounded border transition-colors duration-100 cursor-pointer select-none flex items-center justify-between ${
                   sampleType === "full"
                     ? "border-[#714B67] bg-[#714B67]/5 ring-1 ring-[#714B67]/30 text-zinc-900 dark:text-zinc-100"
                     : "border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-[#714B67]/50"
@@ -150,7 +150,7 @@ export const AddProductSamplingStep: React.FC<AddProductSamplingStepProps> = ({
               {/* Partial Sample */}
               <div
                 onClick={() => onSetSampleType("partial")}
-                className={`p-3 rounded border transition-all cursor-pointer select-none flex items-center justify-between ${
+                className={`p-3 rounded border transition-colors duration-100 cursor-pointer select-none flex items-center justify-between ${
                   sampleType === "partial"
                     ? "border-[#714B67] bg-[#714B67]/5 ring-1 ring-[#714B67]/30 text-zinc-900 dark:text-zinc-100"
                     : "border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-[#714B67]/50"
@@ -203,7 +203,7 @@ export const AddProductSamplingStep: React.FC<AddProductSamplingStepProps> = ({
               <button
                 type="button"
                 onClick={() => onSetSamplingSearchMode("material_code")}
-                className={`flex-1 h-7 rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`flex-1 h-7 rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors duration-100 cursor-pointer ${
                   samplingSearchMode === "material_code"
                     ? "bg-[#714B67] text-white shadow-xs"
                     : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
@@ -216,7 +216,7 @@ export const AddProductSamplingStep: React.FC<AddProductSamplingStepProps> = ({
               <button
                 type="button"
                 onClick={() => onSetSamplingSearchMode("binding")}
-                className={`flex-1 h-7 rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`flex-1 h-7 rounded text-xs font-bold flex items-center justify-center gap-1.5 transition-colors duration-100 cursor-pointer ${
                   samplingSearchMode === "binding"
                     ? "bg-[#714B67] text-white shadow-xs"
                     : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"

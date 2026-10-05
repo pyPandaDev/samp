@@ -76,6 +76,7 @@ export const FeasibilityInspectorModal: React.FC<FeasibilityInspectorModalProps>
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [decisionRemark, setDecisionRemark] = useState("");
   const [selectedPreviewImage, setSelectedPreviewImage] = useState<string | null>(null);
+  const [showChatter, setShowChatter] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<"specs" | "review" | "decision">(
     sourceDesk === "samp" ? "review" : "specs"
   );
@@ -332,19 +333,21 @@ export const FeasibilityInspectorModal: React.FC<FeasibilityInspectorModalProps>
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 animate-smooth-backdrop"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[92vh] max-h-[92vh] flex flex-col bg-[#F1F3F5] dark:bg-[#12141a] border border-[#D8DADD] dark:border-white/10 rounded-sm shadow-2xl overflow-hidden select-text text-xs"
+        className="relative w-full max-w-[96vw] xl:max-w-7xl h-[92vh] max-h-[92vh] flex flex-col bg-[#F1F3F5] dark:bg-[#12141a] border border-[#D8DADD] dark:border-white/10 rounded-md shadow-xl overflow-hidden select-text text-xs animate-smooth-modal"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 1. TOP CONTROL PANEL */}
         <FeasibilityControlPanel
           activeRequest={activeRequest}
           copiedCode={copiedCode}
+          showChatter={showChatter}
+          onToggleChatter={() => setShowChatter((prev) => !prev)}
           onClose={onClose}
           onCopyCode={handleCopyCode}
           onDeleteRequest={onDeleteRequest}
@@ -573,13 +576,15 @@ export const FeasibilityInspectorModal: React.FC<FeasibilityInspectorModalProps>
             </div>
           </div>
 
-          {/* RIGHT: AUTHENTIC ODOO CHATTER AUDIT LOG PANEL */}
-          <FeasibilityChatterFeed
-            activeRequest={activeRequest}
-            classificationLabel={classificationLabel}
-            onAddNote={handleAddNote}
-            currentUser={user}
-          />
+          {/* RIGHT: AUTHENTIC ENTERPRISE ERP CHATTER AUDIT LOG PANEL */}
+          {showChatter && (
+            <FeasibilityChatterFeed
+              activeRequest={activeRequest}
+              classificationLabel={classificationLabel}
+              onAddNote={handleAddNote}
+              currentUser={user}
+            />
+          )}
         </div>
       </div>
 

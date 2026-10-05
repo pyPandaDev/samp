@@ -63,7 +63,7 @@ export const AddProductCatalogStep: React.FC<AddProductCatalogStepProps> = ({
 
   return (
     <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded border border-[#CED4DA] bg-white shadow-2xl animate-smooth-modal dark:border-white/[0.08] dark:bg-[#12141d]">
-      {/* Odoo 19 Modal Header */}
+      {/* Enterprise ERP Modal Header */}
       <div className="flex items-center justify-between px-6 py-3.5 bg-[#714B67] text-white shrink-0 border-b border-[#5B3C53]">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded bg-white/15 flex items-center justify-center text-white shrink-0">

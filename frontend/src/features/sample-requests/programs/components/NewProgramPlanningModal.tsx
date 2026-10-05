@@ -75,12 +75,12 @@ export const NewProgramPlanningModal: React.FC<NewProgramPlanningModalProps> = (
     <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 transition-opacity backdrop-blur-xs"
+        className="fixed inset-0 bg-black/50 animate-smooth-backdrop"
         onClick={onClose}
       />
 
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-lg bg-white dark:bg-[#12141d] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-smooth-modal flex flex-col">
+        <div className="relative w-full max-w-lg bg-white dark:bg-[#12141d] border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-smooth-modal flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-[#161822] shrink-0">
             <div className="flex items-center gap-3">
@@ -139,7 +139,7 @@ export const NewProgramPlanningModal: React.FC<NewProgramPlanningModalProps> = (
                 value={programName}
                 onChange={(e) => setProgramName(e.target.value)}
                 placeholder="e.g. Back to school, Hardcover Notebooks Line, Corporate Diaries"
-                className="w-full h-10 px-3.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/80 text-xs font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:border-[#017E84] focus:ring-2 focus:ring-[#017E84]/15 transition-all shadow-2xs"
+                className="w-full h-10 px-3.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/80 text-xs font-semibold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:border-[#017E84] focus:ring-2 focus:ring-[#017E84]/15 transition-colors duration-100 shadow-2xs"
               />
             </div>
 
@@ -164,7 +164,7 @@ export const NewProgramPlanningModal: React.FC<NewProgramPlanningModalProps> = (
                       key={yr}
                       type="button"
                       onClick={() => setProgramYear(yr)}
-                      className={`h-11 px-3 rounded-xl border text-sm font-bold font-mono transition-all flex items-center justify-center gap-1.5 cursor-pointer select-none ${
+                      className={`h-11 px-3 rounded-xl border text-sm font-bold font-mono transition-colors duration-100 flex items-center justify-center gap-1.5 cursor-pointer select-none ${
                         isSelected
                           ? "border-[#017E84] bg-[#017E84]/10 dark:bg-[#017E84]/20 text-[#017E84] dark:text-[#2dd4bf] shadow-xs ring-2 ring-[#017E84]/20"
                           : "border-zinc-200 dark:border-zinc-700 bg-zinc-50/70 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 hover:bg-white dark:hover:bg-zinc-800"
@@ -190,7 +190,7 @@ export const NewProgramPlanningModal: React.FC<NewProgramPlanningModalProps> = (
 
               <button
                 type="submit"
-                className="h-9.5 px-5 rounded-lg bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold transition-all shadow-xs hover:shadow-sm flex items-center gap-2 cursor-pointer tracking-tight active:scale-95"
+                className="h-9.5 px-5 rounded-lg bg-[#017E84] hover:bg-[#00666A] active:bg-[#005256] text-white text-xs font-bold transition-colors duration-100 shadow-xs hover:shadow-sm flex items-center gap-2 cursor-pointer tracking-tight active:scale-95"
               >
                 <span>Proceed to Material Matrix</span>
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />

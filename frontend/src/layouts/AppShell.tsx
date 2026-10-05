@@ -232,7 +232,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         {/* CLEAN UTILITY TOP BAR (No Redundant Department Tabs)                      */}
         {/* ========================================================================= */}
         {/* ========================================================================= */}
-        {/* ODOO 19 ENTERPRISE UTILITY TOP BAR                                        */}
+        {/* ENTERPRISE UTILITY TOP BAR                                                */}
         {/* ========================================================================= */}
         <header className="h-10 bg-[#714B67] dark:bg-[#3E2938] text-white flex items-center justify-between px-3 sm:px-5 border-b border-[#5B3C53] dark:border-[#2A1B26] shrink-0 z-40 shadow-xs gap-3">
           
@@ -255,7 +255,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                 {activeTitle}
               </span>
               <span className="hidden sm:inline-block ml-2 text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded font-mono font-bold tracking-wider">
-                SMPS 19
+                SAMP ERP
               </span>
             </div>
           </div>

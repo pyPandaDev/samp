@@ -64,12 +64,18 @@
     text-rendering: optimizeLegibility;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
     font-variant-numeric: proportional-nums;
+    scroll-behavior: smooth;
   }
 
-  /* Ergonomic Operational Scrollbar (Discoverable, 6px clean track) */
+  /* Hardware-accelerated smooth scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ergonomic Operational Scrollbar (Lightweight, 5px clean track) */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track {
@@ -77,20 +83,20 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.35);
-    border-radius: 4px;
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(148, 163, 184, 0.65);
+    background: rgba(148, 163, 184, 0.55);
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.12);
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.24);
   }
 
   #root {
@@ -189,22 +195,22 @@
 }
 
 /* ========================================================================= */
-/* ODOO 19 ENTERPRISE THEME COMPONENTS                                       */
+/* ENTERPRISE ERP THEME COMPONENTS                                           */
 /* ========================================================================= */
 
-/* Odoo Document Sheet Canvas */
+/* Document Sheet Canvas */
 .o_form_sheet {
   background: #FFFFFF;
-  border: 1px solid #D8DADD;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 15px -5px rgba(0, 0, 0, 0.02);
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .dark .o_form_sheet {
-  background: #12141d;
+  background: #141722;
   border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Odoo 19 Statusbar Polygon Chevron */
+/* Statusbar Polygon Chevron */
 .o_statusbar_status {
   display: inline-flex;
   align-items: center;
@@ -229,7 +235,7 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  transition: all 140ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 120ms ease, background-color 120ms ease;
   user-select: none;
 }
 .dark .o_arrow_button {
@@ -296,7 +302,7 @@
   border-left-color: #16383b !important;
 }
 
-/* Odoo Smart Stat Buttons */
+/* Enterprise Smart Stat Buttons */
 .oe_stat_button {
   border-left: 1px solid #E2E8F0;
   border-bottom: 1px solid #E2E8F0;

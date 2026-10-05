@@ -5,7 +5,7 @@ import {
   getRequestTrackBadge,
   isOpenFeasibilityReview,
 } from "../utils/trackTypes";
-import { formatOdooDate } from "../utils/dateUtils";
+import { formatErpDate } from "../utils/dateUtils";
 import {
   ClipboardList,
   ClipboardCheck,
@@ -523,7 +523,7 @@ export const MarketingOverviewPage: React.FC<MarketingOverviewPageProps> = ({
                         {r.productDescription || r.programName || "—"}
                       </td>
                       <td className="py-2.5 px-4 text-neutral-500 font-mono text-[10.5px]">
-                        {r.sampleRequiredDate ? formatOdooDate(r.sampleRequiredDate) : (r.dateRequestCreated ? formatOdooDate(r.dateRequestCreated) : "—")}
+                        {r.sampleRequiredDate ? formatErpDate(r.sampleRequiredDate) : (r.dateRequestCreated ? formatErpDate(r.dateRequestCreated) : "—")}
                       </td>
                       <td className="py-2.5 px-4">
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-neutral-100 dark:bg-zinc-800 text-neutral-700 dark:text-zinc-300">

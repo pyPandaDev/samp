@@ -65,6 +65,13 @@ class CreateSampleRequest(Base):
     target_artwork_date_creative = Column(String(50), nullable=True)
     target_artwork_date_studio = Column(String(50), nullable=True)
     request_types = Column(JSONB, nullable=False, default=list, server_default="[]")
+    folder_path = Column(Text, nullable=True)
+    submitted_designs_count = Column(Integer, nullable=True, default=0)
+    submitted_designs = Column(JSONB, nullable=False, default=list, server_default="[]")
+    marketing_decision = Column(String(50), nullable=True)
+    marketing_decision_remarks = Column(Text, nullable=True)
+    selected_mockup_designs = Column(JSONB, nullable=False, default=list, server_default="[]")
+    mockup_requested = Column(Boolean, nullable=False, default=False)
 
     # Relationship to product characteristics details
     product_details = relationship(
@@ -141,6 +148,14 @@ class DesignRequest(Base):
     product_description = Column(Text, nullable=False, default="Creative Design Brief")
     design_required_date = Column(String(50), nullable=True)
     created_by = Column(String(100), nullable=False, default="Marketing Specialist")
+
+    folder_path = Column(Text, nullable=True)
+    submitted_designs_count = Column(Integer, nullable=True, default=0)
+    submitted_designs = Column(JSONB, nullable=False, default=list, server_default="[]")
+    marketing_decision = Column(String(50), nullable=True)
+    marketing_decision_remarks = Column(Text, nullable=True)
+    selected_mockup_designs = Column(JSONB, nullable=False, default=list, server_default="[]")
+    mockup_requested = Column(Boolean, nullable=False, default=False)
 
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), server_default=func.now(), onupdate=lambda: datetime.now(timezone.utc))

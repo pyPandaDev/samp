@@ -266,7 +266,7 @@ export const CreativeSamplingMockupPage: React.FC<CreativeSamplingMockupPageProp
 
       {/* ── 3. Segmented Filter Pills & Control Strip (Aligned to Marketing Desk) ── */}
       <div className="bg-white dark:bg-[#12141d] border-b border-[#E2E8F0] dark:border-white/[0.08] px-6 py-2.5 shrink-0 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Odoo Segmented Scope Filter Pills */}
+        {/* Left: Enterprise Segmented Scope Filter Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
           {scopeTabs.map((tab) => {
             const isActive = scopeFilter === tab.id;
@@ -339,7 +339,7 @@ export const CreativeSamplingMockupPage: React.FC<CreativeSamplingMockupPageProp
             </p>
           </div>
         ) : viewMode === "list" ? (
-          /* Odoo ERP Table View */
+          /* Enterprise ERP Table View */
           <div className="bg-white dark:bg-[#12141d] rounded-xl border border-[#E2E8F0] dark:border-white/[0.08] shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">

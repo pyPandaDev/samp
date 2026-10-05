@@ -8,6 +8,7 @@ import {
   Package,
   Send,
   X,
+  PanelRightClose,
 } from "lucide-react";
 
 export interface InspectorControlPanelProps {
@@ -18,6 +19,8 @@ export interface InspectorControlPanelProps {
   isConverting: boolean;
   isReleasing: boolean;
   isSubmitting: boolean;
+  showChatter?: boolean;
+  onToggleChatter?: () => void;
   onClose: () => void;
   onCopyCode: () => void;
   onDeleteRequest?: (request: SampleRequestItem) => void;
@@ -35,6 +38,8 @@ export const InspectorControlPanel: React.FC<InspectorControlPanelProps> = ({
   isConverting,
   isReleasing,
   isSubmitting,
+  showChatter = true,
+  onToggleChatter,
   onClose,
   onCopyCode,
   onDeleteRequest,
@@ -173,7 +178,7 @@ export const InspectorControlPanel: React.FC<InspectorControlPanelProps> = ({
         )}
       </div>
 
-      {/* Right: Authentic Odoo Statusbar Polygon Stepper */}
+      {/* Right: Authentic Enterprise Statusbar Polygon Stepper */}
       <div className="flex items-center gap-2">
         <div className="o_statusbar_status select-none">
           {trackType === "feasibility_check" ? (
@@ -225,6 +230,29 @@ export const InspectorControlPanel: React.FC<InspectorControlPanelProps> = ({
             </>
           )}
         </div>
+
+        {onToggleChatter && (
+          <button
+            type="button"
+            onClick={onToggleChatter}
+            className={`h-7 px-2 rounded flex items-center gap-1.5 text-[11px] font-medium border transition cursor-pointer ${
+              showChatter
+                ? "bg-neutral-100 dark:bg-zinc-800 text-neutral-700 dark:text-zinc-200 border-[#CED4DA] dark:border-zinc-700 shadow-2xs"
+                : "bg-white dark:bg-zinc-900 text-neutral-500 hover:text-neutral-900 dark:text-zinc-400 dark:hover:text-zinc-100 border-[#CED4DA] dark:border-zinc-700"
+            }`}
+            title={showChatter ? "Collapse Chatter (Full Width Form)" : "Expand Chatter Panel"}
+            aria-label={showChatter ? "Hide Chatter Panel" : "Show Chatter Panel"}
+          >
+            <PanelRightClose
+              className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                showChatter ? "" : "rotate-180"
+              }`}
+            />
+            <span className="hidden sm:inline">
+              {showChatter ? "Hide Chatter" : "Chatter"}
+            </span>
+          </button>
+        )}
 
         {/* Modal Close [X] with Esc */}
         <button

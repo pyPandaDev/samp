@@ -1,23 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   X,
   CheckCircle2,
   AlertTriangle,
-  Download,
   Copy,
   Check,
-  CheckCheck,
   Clock,
   Sparkles,
-  Layers,
-  Palette,
-  FileCheck,
   Send,
-  Eye,
   ExternalLink,
+  FolderGit2,
+  Folder,
+  Plus,
+  Trash2,
+  RefreshCw,
+  FileText,
+  Users,
+  Compass,
 } from "lucide-react";
-import { CreativeBriefItem } from "@/features/sample-requests/types";
-import { SampleRequestItem } from "@/features/sample-requests/types";
+import { CreativeBriefItem, SampleRequestItem, SubmittedDesignItem } from "@/features/sample-requests/types";
+import { submitCreativeOutputApi } from "@/infrastructure/api/sampleRequestsApi";
 
 export interface CreativeInspectorModalProps {
   isOpen: boolean;
@@ -34,10 +36,43 @@ export const CreativeInspectorModal: React.FC<CreativeInspectorModalProps> = ({
   request,
   onUpdateStatus,
 }) => {
-  const [inspectorTab, setInspectorTab] = useState<"proof" | "review" | "assets">("proof");
-  const [clientNoteInput, setClientNoteInput] = useState("");
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [inspectorTab, setInspectorTab] = useState<"output" | "brief">("output");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Requested target designs count
+  const requestedDesignsCount = Number(
+    request?.numberOfDesigns ||
+    (request as any)?.productArtworkNos ||
+    (request as any)?.qtyDesignCosting ||
+    brief?.variantsCount ||
+    1
+  );
+
+  const initialSubmittedCount = Number(
+    request?.submittedDesignsCount ||
+    brief?.submittedDesignsCount ||
+    (request?.submittedDesigns?.length || brief?.submittedDesigns?.length) ||
+    requestedDesignsCount
+  );
+
+  const initialSubmittedDesigns: SubmittedDesignItem[] = useMemo(() => {
+    const existing = request?.submittedDesigns || brief?.submittedDesigns || [];
+    if (existing && existing.length > 0) return existing;
+    return Array.from({ length: initialSubmittedCount }, (_, i) => ({
+      code: `D${i + 1}`,
+      shutterstockNo: "",
+      remark: "",
+    }));
+  }, [request?.submittedDesigns, brief?.submittedDesigns, initialSubmittedCount]);
+
+  const [folderPathInput, setFolderPathInput] = useState(
+    request?.folderPath || brief?.folderPath || ""
+  );
+  const [submittedCountInput, setSubmittedCountInput] = useState(initialSubmittedCount);
+  const [submittedDesignsList, setSubmittedDesignsList] = useState<SubmittedDesignItem[]>(initialSubmittedDesigns);
+  const [isSubmittingOutput, setIsSubmittingOutput] = useState(false);
+  const [outputSubmitSuccess, setOutputSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen || (!brief && !request)) return null;
 
@@ -48,12 +83,8 @@ export const CreativeInspectorModal: React.FC<CreativeInspectorModalProps> = ({
   const designer = brief?.designer || request?.createdBy || "Creative Studio";
   const dimensions = brief?.dimensions || "210 x 297 mm (A4)";
   const dueDate = brief?.dueDate || request?.sampleRequiredDate || request?.targetArtworkDateCreative || "Standard SLA";
-  const accentColor = brief?.accentColor || "#714B67";
-  const proofVersion = brief?.proofVersion || "V1.0-RC";
-  const proofStatus = brief?.proofStatus || (request?.status === "Creative" ? "In Concept" : "Brief Intake");
-  const cmykPassed = brief ? brief.cmykCheckPassed : true;
-  const resolutionDpi = brief?.resolutionDpi || 300;
-  const bleedMm = brief?.bleedMm || 3;
+  const trend = request?.trend || (brief as any)?.trend || null;
+  const targetAudience = request?.targetAudience || (brief as any)?.targetAudience || null;
   const finishingNotes = brief?.finishingNotes || request?.descriptionNotes || "Spot UV on embossed logo areas; Matte Lamination";
   const colorSpecs = brief?.colorSpecs || "CMYK + PMS 871C (Gold Metallic)";
   const referenceImages = request?.referenceImages || [];
@@ -65,29 +96,100 @@ export const CreativeInspectorModal: React.FC<CreativeInspectorModalProps> = ({
     setTimeout(() => setCopiedCode(null), 1200);
   };
 
-  const handleApplyStatus = async (status: CreativeBriefItem["proofStatus"]) => {
-    if (!onUpdateStatus) return;
-    setIsUpdatingStatus(true);
+  const handleCountChange = (newCount: number) => {
+    const count = Math.max(1, Math.min(100, newCount));
+    setSubmittedCountInput(count);
+    setSubmittedDesignsList((prev) => {
+      const nextList = [...prev];
+      if (nextList.length < count) {
+        for (let i = nextList.length; i < count; i++) {
+          nextList.push({
+            code: `D${i + 1}`,
+            shutterstockNo: "",
+            remark: "",
+          });
+        }
+      } else if (nextList.length > count) {
+        return nextList.slice(0, count);
+      }
+      return nextList;
+    });
+  };
+
+  const handleDesignRowChange = (index: number, field: "shutterstockNo" | "remark", val: string) => {
+    setSubmittedDesignsList((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: val };
+      return next;
+    });
+  };
+
+  const handleAddDesignRow = () => {
+    const newIdx = submittedDesignsList.length + 1;
+    setSubmittedDesignsList((prev) => [
+      ...prev,
+      { code: `D${newIdx}`, shutterstockNo: "", remark: "" },
+    ]);
+    setSubmittedCountInput(newIdx);
+  };
+
+  const handleRemoveDesignRow = (index: number) => {
+    if (submittedDesignsList.length <= 1) return;
+    setSubmittedDesignsList((prev) => {
+      const filtered = prev.filter((_, i) => i !== index);
+      const renumbered = filtered.map((item, i) => ({ ...item, code: `D${i + 1}` }));
+      setSubmittedCountInput(renumbered.length);
+      return renumbered;
+    });
+  };
+
+  const handleSubmitOutput = async () => {
+    if (!folderPathInput.trim()) {
+      setSubmitError("Please provide the artwork folder storage path before submitting.");
+      return;
+    }
+    setSubmitError(null);
+    setIsSubmittingOutput(true);
     try {
-      await onUpdateStatus(status, clientNoteInput);
-      setClientNoteInput("");
+      const targetId =
+        request?.designRequestId ||
+        (typeof request?.id === "string" ? parseInt(request.id.replace("design-", ""), 10) : request?.id) ||
+        (typeof brief?.id === "string" ? parseInt(brief.id.replace("cr-", ""), 10) : brief?.id) ||
+        1;
+
+      await submitCreativeOutputApi(targetId, {
+        folder_path: folderPathInput.trim(),
+        submitted_designs_count: submittedDesignsList.length,
+        submitted_designs: submittedDesignsList,
+      });
+
+      setOutputSubmitSuccess(true);
+      if (onUpdateStatus) {
+        await onUpdateStatus(
+          "Creative Output Submitted" as any,
+          `Output submitted with ${submittedDesignsList.length} designs. Folder: ${folderPathInput.trim()}`
+        );
+      }
+      setTimeout(() => setOutputSubmitSuccess(false), 4000);
+    } catch (err: any) {
+      setSubmitError(err?.message || "Failed to submit creative output.");
     } finally {
-      setIsUpdatingStatus(false);
+      setIsSubmittingOutput(false);
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 select-none animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-5 select-none animate-smooth-backdrop"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-5xl max-h-[94vh] flex flex-col bg-white dark:bg-[#0f1118] border border-[#CED4DA] dark:border-white/10 rounded-xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-5xl max-h-[94vh] flex flex-col bg-white dark:bg-[#0f1118] border border-[#CED4DA] dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-smooth-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Control Bar (Odoo Plum Accent) */}
+        {/* Top Control Bar (Enterprise Plum Accent) */}
         <div className="px-5 py-3.5 border-b border-[#CED4DA] dark:border-white/[0.08] bg-[#F8F9FA] dark:bg-[#12141d] flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center flex-wrap gap-2.5">
             <span className="inline-flex items-center gap-1.5 bg-white dark:bg-zinc-800 px-2.5 py-1 rounded border border-[#CED4DA] dark:border-zinc-700 text-xs font-mono font-bold text-[#714B67] dark:text-purple-300 shadow-2xs">
@@ -137,272 +239,366 @@ export const CreativeInspectorModal: React.FC<CreativeInspectorModalProps> = ({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-[#CED4DA] dark:border-white/[0.08] bg-[#F8F9FA] dark:bg-[#0f1118] px-4 shrink-0 gap-2">
+        <div className="flex border-b border-[#CED4DA] dark:border-white/[0.08] bg-[#F8F9FA] dark:bg-[#0f1118] px-4 shrink-0 gap-2 overflow-x-auto">
           <button
             type="button"
-            onClick={() => setInspectorTab("proof")}
-            className={`h-9 px-3 text-xs font-bold border-b-2 cursor-pointer transition-colors ${
-              inspectorTab === "proof"
+            onClick={() => setInspectorTab("output")}
+            className={`h-9 px-3 text-xs font-bold border-b-2 cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              inspectorTab === "output"
                 ? "border-[#714B67] text-[#714B67] dark:text-purple-300"
                 : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
             }`}
           >
-            Artwork Proof Canvas
+            <FolderGit2 className="w-3.5 h-3.5" />
+            Deliverables &amp; Design Output
+            <span className="ml-1 px-1.5 py-0.2 rounded-full font-mono text-[10px] bg-[#714B67]/10 text-[#714B67] dark:text-purple-300 font-bold">
+              {submittedDesignsList.length}/{requestedDesignsCount}
+            </span>
           </button>
           <button
             type="button"
-            onClick={() => setInspectorTab("review")}
-            className={`h-9 px-3 text-xs font-bold border-b-2 cursor-pointer transition-colors flex items-center gap-1.5 ${
-              inspectorTab === "review"
+            onClick={() => setInspectorTab("brief")}
+            className={`h-9 px-3 text-xs font-bold border-b-2 cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              inspectorTab === "brief"
                 ? "border-[#714B67] text-[#714B67] dark:text-purple-300"
                 : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
             }`}
           >
-            <CheckCheck className="w-3.5 h-3.5" />
-            Proof Sign-Off Workflow
-          </button>
-          <button
-            type="button"
-            onClick={() => setInspectorTab("assets")}
-            className={`h-9 px-3 text-xs font-bold border-b-2 cursor-pointer transition-colors flex items-center gap-1.5 ${
-              inspectorTab === "assets"
-                ? "border-[#714B67] text-[#714B67] dark:text-purple-300"
-                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
-            }`}
-          >
-            <Download className="w-3.5 h-3.5" />
-            Vector Assets & Specifications
+            <Sparkles className="w-3.5 h-3.5" />
+            Marketing Brief &amp; Reference Assets
           </button>
         </div>
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
-          {inspectorTab === "proof" && (
+          {inspectorTab === "output" && (
             <div className="space-y-4">
-              {/* Graphic Simulator Card */}
-              <div className="rounded-lg border border-[#CED4DA] dark:border-white/10 bg-zinc-900 p-6 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-inner">
-                <div
-                  className="w-52 h-68 rounded-md shadow-2xl border-4 border-white/20 p-4 flex flex-col justify-between transition-transform hover:scale-[1.02]"
-                  style={{
-                    background: `linear-gradient(135deg, ${accentColor} 0%, #18181b 100%)`,
-                  }}
-                >
-                  <div className="flex justify-between items-start text-white/80">
-                    <span className="font-mono text-[9px] font-bold bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-xs">
-                      {proofVersion}
+              {/* Revision Alert from Marketing if Revisions Requested */}
+              {(request?.marketingDecision === "Revisions_Requested" || (brief as any)?.marketingDecision === "Revisions_Requested") && (
+                <div className="p-3.5 rounded-lg border border-amber-300 dark:border-amber-800/80 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 flex items-start gap-3 shadow-xs">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <span className="font-bold uppercase tracking-wider text-[11px] block">
+                      Marketing Feedback: Revisions / Remaining Designs Requested
                     </span>
-                    <span className="text-[10px] tracking-wider uppercase font-mono font-semibold">{brand}</span>
-                  </div>
-
-                  <div className="my-auto text-left text-white px-1">
-                    <p className="text-[11px] font-mono tracking-widest uppercase text-white/70">Packaging Artwork</p>
-                    <h4 className="text-sm font-bold leading-tight mt-1 truncate">{title}</h4>
-                    <p className="text-[10px] text-white/80 mt-1 font-mono">{dimensions}</p>
-                  </div>
-
-                  <div className="flex justify-between items-end text-white/90 font-mono text-[9px] border-t border-white/15 pt-2">
-                    <span>{colorSpecs.split("+")[0]?.trim() || "CMYK"}</span>
-                    <span>{bleedMm}mm Bleed</span>
+                    <p className="text-xs">
+                      {request?.marketingDecisionRemarks || (brief as any)?.marketingDecisionRemarks || "Marketing has requested revisions on the submitted artwork concepts or additional variants."}
+                    </p>
                   </div>
                 </div>
+              )}
 
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-black/50 text-white/90 font-mono text-[11px] border border-white/10">
-                    <Eye className="w-3.5 h-3.5 text-purple-400" />
-                    Hi-Res CMYK Vector Render ({resolutionDpi} DPI)
+              {/* Success Feedback banner */}
+              {outputSubmitSuccess && (
+                <div className="p-3 rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span className="font-semibold text-xs">
+                    ✓ Creative output successfully submitted to Marketing for review!
                   </span>
                 </div>
-              </div>
+              )}
 
-              {/* Technical Specifications Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="p-3 bg-[#F8F9FA] dark:bg-zinc-800/60 rounded border border-[#CED4DA] dark:border-zinc-700">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Prepress CMYK Check</span>
-                  <div className="flex items-center gap-1.5 mt-1 font-bold text-xs">
-                    {cmykPassed ? (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        <span className="text-emerald-700 dark:text-emerald-400">PASSED (Zero RGB)</span>
-                      </>
+              {/* Error Feedback */}
+              {submitError && (
+                <div className="p-3 rounded-lg border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span className="font-semibold text-xs">{submitError}</span>
+                </div>
+              )}
+
+              {/* Top Summary & Target Comparison Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-lg border border-[#CED4DA] dark:border-zinc-700 bg-[#F8F9FA] dark:bg-zinc-900/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">
+                    Marketing Target
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100">
+                      {requestedDesignsCount}
+                    </span>
+                    <span className="text-xs text-zinc-500 font-medium">Designs Requested</span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-lg border border-[#CED4DA] dark:border-zinc-700 bg-[#F8F9FA] dark:bg-zinc-900/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">
+                    Creative Ready / Produced
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-xl font-bold font-mono text-[#714B67] dark:text-purple-300">
+                      {submittedDesignsList.length}
+                    </span>
+                    <span className="text-xs text-zinc-500 font-medium">Designs Ready</span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-lg border border-[#CED4DA] dark:border-zinc-700 bg-[#F8F9FA] dark:bg-zinc-900/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">
+                    Fulfillment Status
+                  </span>
+                  <div className="mt-1">
+                    {submittedDesignsList.length >= requestedDesignsCount ? (
+                      <span className="inline-flex items-center gap-1 font-bold text-xs text-emerald-700 dark:text-emerald-400">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Full Target Fulfilled
+                      </span>
                     ) : (
-                      <>
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
-                        <span className="text-amber-700 dark:text-amber-400">NEEDS CONVERSION</span>
-                      </>
+                      <span className="inline-flex items-center gap-1 font-bold text-xs text-amber-700 dark:text-amber-400">
+                        <Clock className="w-3.5 h-3.5" /> {requestedDesignsCount - submittedDesignsList.length} Remaining (Partial)
+                      </span>
                     )}
                   </div>
                 </div>
+              </div>
 
-                <div className="p-3 bg-[#F8F9FA] dark:bg-zinc-800/60 rounded border border-[#CED4DA] dark:border-zinc-700">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Raster Resolution</span>
-                  <div className="font-mono font-bold text-xs text-zinc-900 dark:text-zinc-100 mt-1">
-                    {resolutionDpi} DPI (Press Quality)
+              {/* Folder Storage Path Configuration */}
+              <div className="p-4 rounded-lg border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#12141d] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                      <Folder className="w-4 h-4 text-[#714B67]" />
+                      Artwork Server / Storage Folder Path <span className="text-rose-500">*</span>
+                    </label>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      Network share path or Cloud drive link where primary .AI, .PSD, and high-res print files are stored.
+                    </p>
                   </div>
                 </div>
-
-                <div className="p-3 bg-[#F8F9FA] dark:bg-zinc-800/60 rounded border border-[#CED4DA] dark:border-zinc-700">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Bleed Margin</span>
-                  <div className="font-mono font-bold text-xs text-zinc-900 dark:text-zinc-100 mt-1">
-                    {bleedMm}.0 mm All Sides
-                  </div>
-                </div>
-
-                <div className="p-3 bg-[#F8F9FA] dark:bg-zinc-800/60 rounded border border-[#CED4DA] dark:border-zinc-700">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Proof Status</span>
-                  <div className="font-bold text-xs text-[#714B67] dark:text-purple-300 mt-1">
-                    {proofStatus}
-                  </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={folderPathInput}
+                    onChange={(e) => setFolderPathInput(e.target.value)}
+                    placeholder="e.g. \\192.168.1.100\Creative\BTS2026\Neon_Geometry_Designs\ or https://drive.google.com/..."
+                    className="flex-1 p-2.5 text-xs font-mono rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#181a24] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67]"
+                  />
+                  {folderPathInput && (
+                    <button
+                      type="button"
+                      onClick={() => handleCopyCode(folderPathInput)}
+                      className="h-9 px-3 rounded border border-[#CED4DA] dark:border-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      {copiedCode === folderPathInput ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>Copy</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {/* Finishing & Embellishment Notes */}
-              <div className="p-3.5 bg-[#F8F9FA] dark:bg-zinc-800/40 rounded border border-[#CED4DA] dark:border-zinc-700 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Finishing &amp; Embellishment Specification
-                </span>
-                <p className="text-xs text-zinc-800 dark:text-zinc-200">{finishingNotes}</p>
+              {/* Dynamic D1..Dn Design Breakdown Table */}
+              <div className="p-4 rounded-lg border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#12141d] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-200 dark:border-white/10 pb-3">
+                  <div>
+                    <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#714B67]" />
+                      Design Variant Breakdown (D1 to D{submittedDesignsList.length})
+                    </h4>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      Specify Shutterstock stock asset reference and concept remarks for each produced design variant.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-semibold text-zinc-500">Quick adjust count:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={submittedCountInput}
+                      onChange={(e) => handleCountChange(parseInt(e.target.value, 10) || 1)}
+                      className="w-16 h-8 text-center text-xs font-mono font-bold rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#181a24] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddDesignRow}
+                      className="h-8 px-2.5 rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-200 transition cursor-pointer flex items-center gap-1"
+                      title="Add one more design row"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Row</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto rounded border border-[#CED4DA] dark:border-white/10">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-[#F8F9FA] dark:bg-zinc-800/80 border-b border-[#CED4DA] dark:border-white/10 text-[11px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                        <th className="py-2.5 px-3 w-20">Design #</th>
+                        <th className="py-2.5 px-3 w-64">Shutterstock Number / Asset ID</th>
+                        <th className="py-2.5 px-3">Design Title &amp; Specification Remarks</th>
+                        <th className="py-2.5 px-3 w-16 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#CED4DA] dark:divide-white/10">
+                      {submittedDesignsList.map((design, idx) => (
+                        <tr key={idx} className="hover:bg-zinc-50/60 dark:hover:bg-white/[0.02] transition-colors">
+                          <td className="py-2 px-3 align-middle">
+                            <span className="inline-flex items-center justify-center font-mono font-bold text-xs px-2.5 py-1 rounded bg-[#714B67]/10 dark:bg-purple-950/50 text-[#714B67] dark:text-purple-300 border border-[#714B67]/20">
+                              {design.code || `D${idx + 1}`}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 align-middle">
+                            <input
+                              type="text"
+                              value={design.shutterstockNo}
+                              onChange={(e) => handleDesignRowChange(idx, "shutterstockNo", e.target.value)}
+                              placeholder="e.g. SS-2489102"
+                              className="w-full p-1.5 text-xs font-mono rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#181a24] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67]"
+                            />
+                          </td>
+                          <td className="py-2 px-3 align-middle">
+                            <input
+                              type="text"
+                              value={design.remark}
+                              onChange={(e) => handleDesignRowChange(idx, "remark", e.target.value)}
+                              placeholder="e.g. Neon geometry pattern with copper foil accents & matte lamination"
+                              className="w-full p-1.5 text-xs rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#181a24] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67]"
+                            />
+                          </td>
+                          <td className="py-2 px-3 text-center align-middle">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveDesignRow(idx)}
+                              disabled={submittedDesignsList.length <= 1}
+                              className="text-zinc-400 hover:text-rose-600 disabled:opacity-30 disabled:hover:text-zinc-400 transition cursor-pointer p-1"
+                              title="Delete design row"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Submit Action Bar */}
+                <div className="pt-3 border-t border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="text-zinc-500 text-[11px]">
+                    Submitting this form notifies Marketing of your ready designs and allows them to approve or request mockups.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSubmitOutput}
+                    disabled={isSubmittingOutput}
+                    className="w-full sm:w-auto h-9 px-5 rounded-md bg-[#714B67] hover:bg-[#5b3c53] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmittingOutput ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Submitting Output...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Submit Creative Output ({submittedDesignsList.length} Designs)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {inspectorTab === "brief" && (
+            <div className="space-y-4">
+              {/* Marketing Creative Intake Brief Card */}
+              <div className="p-4 rounded-lg border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#12141d] space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-zinc-800">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-[#714B67]" />
+                    Marketing Creative Intake Brief
+                  </span>
+                  <span className="text-[11px] font-mono text-zinc-500">
+                    Source: {request?.srNumber || artCode}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                  <div className="p-3 rounded bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1">
+                      <Compass className="w-3 h-3 text-[#714B67]" />
+                      Trend &amp; Aesthetic Direction
+                    </span>
+                    <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed">
+                      {trend || "Standard commercial styling. Follow brand guidelines."}
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1">
+                      <Users className="w-3 h-3 text-[#714B67]" />
+                      Target Audience / Demographic
+                    </span>
+                    <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed">
+                      {targetAudience || "General retail & commercial consumer market."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Finishing Notes from Marketing */}
+                <div className="p-3 rounded bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    Finishing, Coating &amp; Embellishment Requirements
+                  </span>
+                  <p className="text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed">
+                    {finishingNotes}
+                  </p>
+                </div>
               </div>
 
               {/* Reference Links & Images if available */}
               {(referenceImages.length > 0 || referenceLinks.length > 0) && (
-                <div className="p-3.5 bg-[#F8F9FA] dark:bg-zinc-800/40 rounded border border-[#CED4DA] dark:border-zinc-700 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                    Client Attachments &amp; Moodboard References
+                <div className="p-4 bg-white dark:bg-[#12141d] rounded-lg border border-[#CED4DA] dark:border-zinc-700 space-y-3">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    Client Moodboard &amp; Reference Assets
                   </span>
                   {referenceImages.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {referenceImages.map((img, i) => (
-                        <a
-                          key={i}
-                          href={img}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white dark:bg-zinc-800 border border-[#CED4DA] text-xs text-[#714B67] hover:underline"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          <span>Reference Asset #{i + 1}</span>
-                        </a>
-                      ))}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[10.5px] font-semibold text-zinc-500 uppercase font-mono">Reference Images:</span>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                        {referenceImages.map((img, i) => (
+                          <a
+                            key={i}
+                            href={img}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group relative rounded border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-100 dark:bg-zinc-800 hover:border-[#714B67] transition block"
+                          >
+                            <img
+                              src={img}
+                              alt={`Reference ${i + 1}`}
+                              className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-200"
+                            />
+                            <div className="p-1.5 bg-white dark:bg-zinc-900 flex items-center justify-between text-[10.5px] font-mono">
+                              <span className="truncate text-zinc-700 dark:text-zinc-300">Asset #{i + 1}</span>
+                              <ExternalLink className="w-3 h-3 text-[#714B67]" />
+                            </div>
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
                   {referenceLinks.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {referenceLinks.map((link, i) => (
-                        <a
-                          key={i}
-                          href={link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white dark:bg-zinc-800 border border-[#CED4DA] text-xs text-teal-700 hover:underline"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          <span className="truncate max-w-xs">{link}</span>
-                        </a>
-                      ))}
+                    <div className="space-y-1.5 pt-2">
+                      <span className="text-[10.5px] font-semibold text-zinc-500 uppercase font-mono">External Web Inspiration:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {referenceLinks.map((link, i) => (
+                          <a
+                            key={i}
+                            href={link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs text-[#714B67] dark:text-purple-300 hover:underline"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate max-w-sm">{link}</span>
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
               )}
-            </div>
-          )}
-
-          {inspectorTab === "review" && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#12141d] space-y-3">
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                  <CheckCheck className="w-4 h-4 text-[#714B67]" />
-                  Client Sign-Off &amp; Studio Proof Approval
-                </h4>
-                <p className="text-xs text-zinc-500">
-                  Update proofing status across the graphic workflow. Once certified, packaging dielines and print plates can be released to Studio &amp; Plant execution.
-                </p>
-
-                <div className="space-y-2 pt-2">
-                  <label className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300">
-                    Sign-Off Remarks / Revision Notes:
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={clientNoteInput}
-                    onChange={(e) => setClientNoteInput(e.target.value)}
-                    placeholder="e.g. Brand director signed off color proof on 27-Sep; ready to release to Studio dieline..."
-                    className="w-full p-2.5 text-xs rounded border border-[#CED4DA] dark:border-zinc-700 bg-white dark:bg-[#181a24] text-zinc-900 dark:text-zinc-100 outline-none focus:border-[#714B67]"
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <button
-                    type="button"
-                    disabled={isUpdatingStatus}
-                    onClick={() => handleApplyStatus("Prepress Approved")}
-                    className="px-3.5 py-1.5 rounded bg-[#017E84] hover:bg-[#00666A] text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Certify Prepress Approved</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={isUpdatingStatus}
-                    onClick={() => handleApplyStatus("Client Review")}
-                    className="px-3 py-1.5 rounded bg-white hover:bg-[#F8F9FA] text-zinc-700 border border-[#CED4DA] text-xs font-semibold transition cursor-pointer"
-                  >
-                    Mark in Client Review
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={isUpdatingStatus}
-                    onClick={() => handleApplyStatus("Revisions Requested")}
-                    className="px-3 py-1.5 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold transition cursor-pointer"
-                  >
-                    Request Design Revisions
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {inspectorTab === "assets" && (
-            <div className="space-y-3">
-              <div className="p-4 bg-[#F8F9FA] dark:bg-zinc-800/40 rounded border border-[#CED4DA] dark:border-zinc-700 space-y-2">
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                  Vector Production Deliverables
-                </h4>
-                <p className="text-xs text-zinc-500">
-                  Production-ready Illustrator artwork layers with spot Pantone separations, dieline cut/crease guides, and trapping offsets.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => alert(`Downloading high-resolution print PDF for ${artCode}...`)}
-                    className="p-3 bg-white dark:bg-zinc-800 rounded border border-[#CED4DA] dark:border-zinc-700 text-left hover:border-[#714B67] transition cursor-pointer flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="block font-bold text-xs text-zinc-900 dark:text-zinc-100">
-                        Print Ready PDF/X-4
-                      </span>
-                      <span className="text-[10px] text-zinc-400 font-mono">CMYK + Spot Varnish · 48.2 MB</span>
-                    </div>
-                    <Download className="w-4 h-4 text-[#714B67]" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => alert(`Downloading Adobe Illustrator source package for ${artCode}...`)}
-                    className="p-3 bg-white dark:bg-zinc-800 rounded border border-[#CED4DA] dark:border-zinc-700 text-left hover:border-[#714B67] transition cursor-pointer flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="block font-bold text-xs text-zinc-900 dark:text-zinc-100">
-                        Packaged Illustrator (.AI)
-                      </span>
-                      <span className="text-[10px] text-zinc-400 font-mono">Linked Typefaces &amp; Assets · 112 MB</span>
-                    </div>
-                    <Download className="w-4 h-4 text-[#714B67]" />
-                  </button>
-                </div>
-              </div>
             </div>
           )}
         </div>

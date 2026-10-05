@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { SampleRequestItem, FeasibilityActivityItem } from "../../types";
-import { formatOdooDate, formatOdooLogDate } from "../../utils/dateUtils";
+import { formatErpDate, formatLogDate } from "../../utils/dateUtils";
 import {
   Package,
   Send,
@@ -68,9 +68,9 @@ export const FeasibilityChatterFeed: React.FC<FeasibilityChatterFeedProps> = ({
     const events: DisplayEvent[] = [];
     const recordedActions = new Set<string>();
 
-    const rawActivities: FeasibilityActivityItem[] = Array.isArray(activeRequest.activities)
+    const rawActivities: FeasibilityActivityItem[] = (Array.isArray(activeRequest.activities)
       ? activeRequest.activities
-      : [];
+      : []) as FeasibilityActivityItem[];
 
     // 1. Process persisted DB activities (excluding spammy VIEWED events)
     rawActivities
@@ -87,7 +87,7 @@ export const FeasibilityChatterFeed: React.FC<FeasibilityChatterFeedProps> = ({
             action: act.action,
             title: "Request Logged into System",
             body: `Feasibility check registered for ${activeRequest.customer || "Customer"} (${classificationLabel}). Target SLA: ${
-              activeRequest.sampleRequiredDate ? formatOdooDate(activeRequest.sampleRequiredDate) : "Flexible"
+              activeRequest.sampleRequiredDate ? formatErpDate(activeRequest.sampleRequiredDate) : "Flexible"
             }.`,
             timestamp: act.createdAt || activeRequest.createdAt || activeRequest.dateRequestCreated || "",
             badge: { text: "Intake", variant: "purple" },
@@ -258,7 +258,7 @@ export const FeasibilityChatterFeed: React.FC<FeasibilityChatterFeedProps> = ({
 
   return (
     <div className="w-80 lg:w-96 border-l border-[#D8DADD] dark:border-white/10 bg-[#FBFBFC] dark:bg-[#161822] flex flex-col shrink-0 overflow-hidden text-xs">
-      {/* ── Odoo Chatter Top Header Bar ── */}
+      {/* ── Enterprise Chatter Top Header Bar ── */}
       <div className="p-3 border-b border-[#D8DADD] dark:border-white/10 bg-white dark:bg-zinc-900/60 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-2xs"></span>
@@ -309,7 +309,7 @@ export const FeasibilityChatterFeed: React.FC<FeasibilityChatterFeedProps> = ({
         </div>
       </div>
 
-      {/* ── Quick Note Composer (Odoo "Log Note" Bar) ── */}
+      {/* ── Quick Note Composer (Enterprise "Log Note" Bar) ── */}
       {onAddNote && (
         <form
           onSubmit={handleSubmitNote}
@@ -394,7 +394,7 @@ export const FeasibilityChatterFeed: React.FC<FeasibilityChatterFeedProps> = ({
                       className="text-[10px] text-neutral-400 font-mono shrink-0"
                       title={evt.timestamp || ""}
                     >
-                      {formatOdooLogDate(evt.timestamp)}
+                      {formatLogDate(evt.timestamp)}
                     </span>
                   </div>
 

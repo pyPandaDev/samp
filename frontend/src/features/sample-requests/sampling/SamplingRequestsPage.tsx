@@ -5,7 +5,7 @@ import { SampleRequestItem } from "../types";
 import { getStageIdForRequest } from "../utils/trackTypes";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { getBusinessYearForDate } from "@/lib/businessYear";
-import { formatOdooDate } from "../utils/dateUtils";
+import { formatErpDate } from "../utils/dateUtils";
 import {
   Search,
   Plus,
@@ -415,7 +415,7 @@ export const SamplingRequestsPage: React.FC<SamplingRequestsPageProps> = ({
     } else if (diffDays <= 2) {
       return { type: "soon" as const, label: `${diffDays}d left`, days: diffDays };
     } else {
-      return { type: "normal" as const, label: formatOdooDate(dateStr), days: diffDays };
+      return { type: "normal" as const, label: formatErpDate(dateStr), days: diffDays };
     }
   };
 
@@ -838,7 +838,7 @@ export const SamplingRequestsPage: React.FC<SamplingRequestsPageProps> = ({
       {/* ── 3. Segmented Filter Pills & Control Strip ── */}
       <div className="bg-white dark:bg-[#12141d] border-b border-[#E2E8F0] dark:border-white/[0.08] px-6 py-2.5 shrink-0 flex flex-wrap items-center justify-between gap-3">
 
-        {/* Left: Odoo Segmented Stage Filter Pills */}
+        {/* Left: Enterprise Segmented Stage Filter Pills */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
           {SAMPLING_STAGES.map((tab) => {
             const isActive = selectedStageTab === tab.id;
@@ -1037,7 +1037,7 @@ export const SamplingRequestsPage: React.FC<SamplingRequestsPageProps> = ({
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     {selectedStageTab === "draft" ? (
-                      /* Dedicated Odoo Draft Program Table Header */
+                      /* Dedicated Enterprise Draft Program Table Header */
                       <tr className="border-b border-[#CED4DA] dark:border-zinc-700 bg-[#F8F9FA] dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 font-mono text-[10.5px] font-bold uppercase tracking-wider select-none">
                         <th className="py-2.5 px-3 w-8 text-center border-r border-[#CED4DA] dark:border-zinc-700">
                           <input
@@ -1482,7 +1482,7 @@ export const SamplingRequestsPage: React.FC<SamplingRequestsPageProps> = ({
                         onDragOver={(e) => handleColDragOver(e, col.id)}
                         onDragLeave={() => setDragOverCol((prev) => (prev === col.id ? null : prev))}
                         onDrop={(e) => handleColDrop(e, col.id)}
-                        className={`w-76 rounded-lg border transition-all ${dragOverCol === col.id
+                        className={`w-76 rounded-lg border transition-colors duration-100 ${dragOverCol === col.id
                           ? "border-[#714B67] bg-purple-50/70 dark:bg-purple-950/40 ring-2 ring-[#714B67]/40 ring-offset-1"
                           : `${col.borderTone} ${col.bgTone}`
                           } p-3 flex flex-col space-y-2.5 shadow-2xs`}

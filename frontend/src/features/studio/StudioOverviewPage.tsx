@@ -270,7 +270,7 @@ export const StudioOverviewPage: React.FC<StudioOverviewPageProps> = ({
         </div>
       </div>
 
-      {/* ── 4. Recent Structural CAD Blueprints Data Table (Odoo ERP Standard) ── */}
+      {/* ── 4. Recent Structural CAD Blueprints Data Table (Enterprise ERP Standard) ── */}
       <div className="bg-white dark:bg-[#12141d] rounded-xl border border-[#CED4DA] dark:border-white/[0.08] shadow-2xs overflow-hidden flex flex-col">
         <div className="p-3.5 border-b border-[#E2E8F0] dark:border-white/[0.08] flex items-center justify-between">
           <div className="flex items-center gap-2">

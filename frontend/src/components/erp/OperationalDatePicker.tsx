@@ -507,7 +507,7 @@ export const OperationalDatePicker: React.FC<OperationalDatePickerProps> = ({
                     onClick={() => handleDaySelect(day)}
                     title={`Restricted: ${holidayLabel} (Plant Off)`}
                     className={cn(
-                      "relative h-8 rounded flex flex-col items-center justify-center transition-all cursor-not-allowed",
+                      "relative h-8 rounded flex flex-col items-center justify-center transition-colors duration-100 cursor-not-allowed",
                       "bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-900/50",
                       "text-rose-600 dark:text-rose-400 hover:border-rose-400 active:scale-95"
                     )}

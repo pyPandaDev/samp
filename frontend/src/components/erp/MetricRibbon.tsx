@@ -36,7 +36,7 @@ export const MetricRibbon: React.FC<MetricRibbonProps> = ({ metrics, className =
                 : "hover:bg-zinc-50 dark:hover:bg-white/[0.02]",
             ].join(" ")}
           >
-            {/* Active bottom-border accent indicator in signature Odoo purple */}
+            {/* Active bottom-border accent indicator in signature Enterprise purple */}
             {item.isActive && (
               <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#714B67] dark:bg-purple-400" />
             )}

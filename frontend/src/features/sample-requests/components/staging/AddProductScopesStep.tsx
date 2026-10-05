@@ -37,7 +37,7 @@ export const AddProductScopesStep: React.FC<AddProductScopesStepProps> = ({
 }) => {
   return (
     <div className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded border border-[#CED4DA] dark:border-white/[0.08] bg-white dark:bg-[#12141d] shadow-2xl animate-smooth-modal">
-      {/* Odoo 19 Modal Header */}
+      {/* Enterprise ERP Modal Header */}
       <div className="flex items-center justify-between px-6 py-3.5 bg-[#714B67] text-white shrink-0 border-b border-[#5B3C53]">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded bg-white/15 flex items-center justify-center text-white shrink-0">
@@ -87,7 +87,7 @@ export const AddProductScopesStep: React.FC<AddProductScopesStepProps> = ({
                   onClick={() => onToggleScope(item.id)}
                   disabled={disabled}
                   aria-pressed={isSelected}
-                  className={`group flex min-h-[104px] w-full items-start gap-3 rounded border p-3.5 text-left transition-all cursor-pointer ${
+                  className={`group flex min-h-[104px] w-full items-start gap-3 rounded border p-3.5 text-left transition-colors duration-100 cursor-pointer ${
                     disabled
                       ? "cursor-not-allowed border-[#CED4DA] bg-zinc-50 opacity-40 dark:border-zinc-800 dark:bg-white/[0.02]"
                       : isSelected

@@ -4,7 +4,7 @@ import { Package, Check, AlertTriangle, XCircle, Clock, User, ClipboardCheck } f
 
 export interface FeasibilityActivityTimelineProps {
   request: SampleRequestItem;
-  activities?: FeasibilityActivityItem[];
+  activities?: (FeasibilityActivityItem | any)[];
 }
 
 export const FeasibilityActivityTimeline: React.FC<FeasibilityActivityTimelineProps> = ({

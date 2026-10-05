@@ -30,7 +30,7 @@ export const InspectorChatter: React.FC<InspectorChatterProps> = ({ chatterFeed 
         </span>
       </div>
 
-      {/* Odoo Chatter Header Bar - Live Activity Log */}
+      {/* Enterprise Chatter Header Bar - Live Activity Log */}
       <div className="p-3 border-b border-[#D8DADD] dark:border-white/10 bg-[#FBFBFC] dark:bg-zinc-900/60 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>

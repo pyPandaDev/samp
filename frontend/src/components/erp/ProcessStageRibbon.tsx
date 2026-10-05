@@ -27,7 +27,7 @@ export const ProcessStageRibbon: React.FC<ProcessStageRibbonProps> = ({
     <div
       className={`border-b border-[#e2e8f0] dark:border-white/[0.08] bg-[#f8f9fa] dark:bg-[#0e1017] px-4 sm:px-6 py-2 overflow-x-auto select-none no-scrollbar flex items-center justify-between gap-4 ${className}`}
     >
-      {/* Odoo 19 Polygon Chevron Statusbar */}
+      {/* Enterprise ERP Polygon Chevron Statusbar */}
       <div className="o_statusbar_status select-none shadow-2xs">
         {stages.map((stage, idx) => {
           const isSelected = selectedStageId === stage.id;
@@ -69,7 +69,7 @@ export const ProcessStageRibbon: React.FC<ProcessStageRibbonProps> = ({
 
       <div className="hidden lg:flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
         <span className="w-1.5 h-1.5 rounded-full bg-[#714B67] dark:bg-purple-400" />
-        <span>Odoo 19 Enterprise Workflow Pipeline</span>
+        <span>Navneet Enterprise Operational Flow</span>
       </div>
     </div>
   );

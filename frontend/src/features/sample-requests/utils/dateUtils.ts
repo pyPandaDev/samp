@@ -1,9 +1,9 @@
 /**
- * Odoo Enterprise Standard Date & Time Formatter
+ * Enterprise Standard Date & Time Formatter
  * Provides consistent, polished, human-readable date & time formatting across all desks, chatter logs, and audit trails.
  */
 
-export function formatOdooLogDate(dateInput?: string | Date | null): string {
+export function formatLogDate(dateInput?: string | Date | null): string {
   if (!dateInput) return "Recent";
   try {
     const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
@@ -60,7 +60,7 @@ export function formatOdooLogDate(dateInput?: string | Date | null): string {
   }
 }
 
-export function formatOdooDate(dateInput?: string | Date | null): string {
+export function formatErpDate(dateInput?: string | Date | null): string {
   if (!dateInput) return "—";
   try {
     const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
@@ -74,3 +74,4 @@ export function formatOdooDate(dateInput?: string | Date | null): string {
     return String(dateInput || "—");
   }
 }
+

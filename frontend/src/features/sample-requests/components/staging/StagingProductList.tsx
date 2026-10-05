@@ -250,7 +250,7 @@ export const StagingProductList: React.FC<StagingProductListProps> = ({
         </table>
       </div>
 
-      {/* Odoo Style "+ Add a Line" Footer Bar */}
+      {/* Enterprise Style "+ Add a Line" Footer Bar */}
       <div className="p-2.5 bg-[#F8F9FA] dark:bg-zinc-900/60 border-t border-[#CED4DA] dark:border-zinc-700">
         <button
           type="button"

@@ -75,10 +75,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     window.addEventListener("samp:requests-changed", handleRequestsChanged);
     window.addEventListener("focus", handleRequestsChanged);
 
-    // Heartbeat sync every 5 seconds to ensure DB consistency
+    // Background polling fallback every 60 seconds (event-driven updates handle instant changes)
     const timer = setInterval(() => {
       setReloadTrigger((prev) => prev + 1);
-    }, 5000);
+    }, 60000);
 
     return () => {
       window.removeEventListener("samp:requests-changed", handleRequestsChanged);
@@ -287,7 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                       {/* Active indicator bar */}
                       <span
-                        className={`absolute left-0 inset-y-2 w-[3.5px] rounded-r-full transition-all duration-200 ${
+                        className={`absolute left-0 inset-y-2 w-[3.5px] rounded-r-full transition-opacity duration-150 ${
                           active ? `${ACTIVE_ACCENT} opacity-100` : "opacity-0"
                         }`}
                       />
@@ -420,10 +420,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isMobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/50 animate-smooth-backdrop"
             onClick={onCloseMobile}
           />
-          <aside className="fixed inset-y-0 left-0 z-50 w-[276px] shadow-2xl flex flex-col">
+          <aside className="fixed inset-y-0 left-0 z-50 w-[276px] shadow-xl flex flex-col animate-smooth-drawer">
             {renderNavContent(true)}
           </aside>
         </div>
